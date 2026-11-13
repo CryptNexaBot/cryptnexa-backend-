@@ -1,7 +1,9 @@
-fastapi
-uvicorn
-pydantic
-pybit
-supabase
-python-telegram-bot
+Flask
+Flask-Cors
+PyJWT
+Flask-Limiter
+pymongo
+python-dotenv
 requests
+gunicorn
+
