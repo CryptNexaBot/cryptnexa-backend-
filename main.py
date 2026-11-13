@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 1. Bogga koowaad ee soo bandhigaya CRYPTNEXA WebApp (index.html)
+# 1. Soo bandhigida WebApp-ka (index.html)
 @app.get("/")
 def serve_home():
     if os.path.exists("index.html"):
@@ -56,7 +56,8 @@ def create_deposit(data: InvestmentRequest):
     if not supabase:
         raise HTTPException(status_code=500, detail="Supabase is not configured.")
     
-    unique_decimal = round(data.amount + random.randint(1, 99) / 1000, 3)
+    # Abuurista decimal gaar ah oo lagu aqoonsado lacagta isticmaalaha (tusaale: 50 + 0.432 = 50.432)[span_3](start_span)[span_3](end_span)
+    unique_decimal = round(data.amount + random.randint(1, 999) / 10000, 4)
     
     supabase.table("deposits").insert({
         "telegram_id": data.telegram_id,
@@ -69,7 +70,7 @@ def create_deposit(data: InvestmentRequest):
     return {
         "status": "success",
         "expected_amount": unique_decimal,
-        "message": "Fadlan ku soo dir xaddigaan saxda ah ee USDT shabakadda TRC20."
+        "message": f"Fadlan ku soo dir xaddiga saxda ah ee {unique_decimal} USDT shabakadda TRC20."
     }
 
 @app.post("/api/verify-deposit")
@@ -79,19 +80,21 @@ def verify_deposit(telegram_id: int):
         
     db_res = supabase.table("deposits").select("*").eq("telegram_id", telegram_id).eq("status", "pending").execute()
     if not db_res.data:
-        raise HTTPException(status_code=404, detail="Ma jiro lacag la sugayo.")
+        raise HTTPException(status_code=404, detail="Ma jiro lacag la sugayo oo pending ah.")
     
     expected = db_res.data[0]["expected_amount"]
     
     try:
-        deposits = session.get_deposit_record(coin="USDT", limit=10)
+        # Si toos ah uga soo aqri Bybit Deposit Records (Real Blockchain Check)[span_4](start_span)[span_4](end_span)
+        deposits = session.get_deposit_record(coin="USDT", limit=20)
         result_list = deposits.get("result", {}).get("rows", [])
         
         for item in result_list:
-            if float(item["amount"]) == float(expected) and item["status"] == 3:
+            # Hubinta in lacagta timid ay la mid tahay xaddigii saxda ahaa ee decimal-ka lahaa[span_5](start_span)[span_5](end_span)
+            if abs(float(item["amount"]) - float(expected)) < 0.0001 and int(item["status"]) == 3:
                 supabase.table("deposits").update({"status": "completed"}).eq("telegram_id", telegram_id).execute()
-                return {"status": "verified", "message": "Lacagtadii si guul leh bay ku soo gaartay, maalgashigii waa la bilaabay!"}
+                return {"status": "verified", "message": "Lacagtadii si dhab ah ayaa loo xaqiijiyay, maalgashigii waa la bilaabay!"}
                 
-        return {"status": "pending", "message": "Weli lama helin xaddiga lacagta ah ee Bybit."}
+        return {"status": "pending", "message": "Weli lama helin xaddiga lacagta ah ee Bybit blockchain."}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
