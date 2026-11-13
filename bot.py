@@ -11,7 +11,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         [InlineKeyboardButton("🚀 Fur CRYPTNEXA WebApp", web_app={"url": WEBAPP_URL})]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-
+    
     await update.message.reply_text(
         f"👋 Ku soo dhawoow CRYPTNEXA, *{user_name}*!\n\n"
         "Nidaamka maalgashiga iyo xaqiijinta tooska ah ee USDT. Riix badhanka hoose si aad u furto madasha:",
