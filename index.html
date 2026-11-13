@@ -1,90 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CRYPTNEXA - Institutional Crypto Yield</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border: #334155;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-color); color: var(--text-main); padding-bottom: 80px; }
+    .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+    
+    /* Header */
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-top: 10px; }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { background: linear-gradient(135deg, #10b981, #047857); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+    .logo-title h1 { font-size: 18px; font-weight: 700; letter-spacing: 0.5px; }
+    .logo-title p { font-size: 11px; color: var(--text-muted); text-transform: uppercase; }
+    .user-badge { background: var(--card-bg); padding: 6px 12px; border-radius: 20px; font-size: 13px; border: 1px solid var(--border); display: flex; align-items: center; gap: 6px; }
+
+    /* Cards */
+    .card { background: var(--card-bg); border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    .balance-card { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid #10b98155; }
+    .balance-title { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
+    .balance-amount { font-size: 28px; font-weight: 700; color: #10b981; margin-bottom: 16px; }
+    
+    /* Tabs & Buttons */
+    .btn-group { display: flex; gap: 10px; }
+    .btn { flex: 1; padding: 12px; border-radius: 10px; border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-main); }
+    
+    /* Form Inputs */
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .input-field { width: 100%; padding: 12px; background: var(--bg-color); border: 1px solid var(--border); border-radius: 10px; color: white; font-size: 14px; }
+    .input-field:focus { outline: none; border-color: var(--accent); }
+
+    /* Navigation Bar */
+    .nav-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--card-bg); border-top: 1px solid var(--border); display: flex; justify-content: space-around; padding: 12px 0; z-index: 100; }
+    .nav-item { background: none; border: none; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; cursor: pointer; }
+    .nav-item.active { color: var(--accent); }
+
+    /* Sections */
+    .section { display: none; }
+    .section.active { display: block; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo-area">
+        <div class="logo-icon"><i data-lucide="gem"></i></div>
+        <div class="logo-title">
+          <h1>CRYPTNEXA</h1>
+          <p>Institutional Yield</p>
+        </div>
+      </div>
+      <div class="user-badge">
+        <span id="user-avatar" style="width:8px; height:8px; background:#10b981; border-radius:50%;"></span>
+        <span id="user-name">Investor</span>
+      </div>
+    </div>
+
+    <!-- HOME SECTION -->
+    <div id="sec-home" class="section active">
+      <div class="card balance-card">
+        <div class="balance-title">Total Portfolio Balance</div>
+        <div class="balance-amount">$0.00 <span style="font-size:14px; color:var(--text-muted)">USDT</span></div>
+        <div class="btn-group">
+          <button class="btn btn-primary" onclick="switchTab('deposit')"><i data-lucide="arrow-down-left"></i> Deposit</button>
+          <button class="btn btn-outline" onclick="switchTab('withdraw')"><i data-lucide="arrow-up-right"></i> Withdraw</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px; margin-bottom:12px;">Active Investment Plans</h3>
+        <div id="plans-container">
+          <p style="color:var(--text-muted); font-size:13px;">Loading high-yield plans from database...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DEPOSIT SECTION -->
+    <div id="sec-deposit" class="section">
+      <div class="card">
+        <h3 style="font-size:16px; margin-bottom:16px;">Deposit USDT (Real Network)</h3>
+        <div class="input-group">
+          <label>Select Network</label>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" style="font-size:13px;">USDT TRC20</button>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Investment Amount (USDT)</label>
+          <input type="number" id="deposit-amt" class="input-field" placeholder="e.g. 50">
+        </div>
+        <button class="btn btn-primary" style="width:100%; margin-top:10px;" onclick="createRealDeposit()">Generate Deposit Order</button>
+      </div>
+
+      <div class="card" id="deposit-info-card" style="display:none;">
+        <h4 style="font-size:14px; color:var(--accent); margin-bottom:8px;">Payment Instructions</h4>
+        <p style="font-size:12px; color:var(--text-muted); margin-bottom:8px;">Send the exact amount including decimals to verify instantly via Bybit:</p>
+        <div class="input-group">
+          <input type="text" id="exact-amount-display" class="input-field" readonly style="font-weight:bold; color:#10b981;">
+        </div>
+        <button class="btn btn-primary" style="width:100%; background:#0284c7;" onclick="verifyBybitDeposit()"><i data-lucide="check-circle"></i> Verify Bybit Deposit</button>
+      </div>
+    </div>
+
+    <!-- PROFILE SECTION -->
+    <div id="sec-profile" class="section">
+      <div class="card">
+        <h3 id="profile-fullname" style="font-size:16px; margin-bottom:4px;">Investor</h3>
+        <p id="profile-telegram-id" style="font-size:13px; color:var(--text-muted);">ID: 7076265514</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAVIGATION -->
+  <div class="nav-bar">
+    <button class="nav-item active" onclick="switchTab('home')" id="nav-home"><i data-lucide="layout-dashboard"></i> Home</button>
+    <button class="nav-item" onclick="switchTab('deposit')" id="nav-deposit"><i data-lucide="wallet"></i> Deposit</button>
+    <button class="nav-item" onclick="switchTab('profile')" id="nav-profile"><i data-lucide="user"></i> Profile</button>
+  </div>
+
   <script>
     lucide.createIcons();
     let tg = window.Telegram?.WebApp;
-    let currentUserProfile = { name: 'Investor', username: '@investor', id: '7076265514' };
+    let currentUser = { id: 7076265514, name: 'Investor' };
 
     if (tg) {
       tg.expand();
       if (tg.initDataUnsafe?.user) {
-        const user = tg.initDataUnsafe.user;
-        currentUserProfile.name = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-        currentUserProfile.username = user.username ? '@' + user.username : '@User_' + user.id;
-        currentUserProfile.id = user.id.toString();
-        document.getElementById('user-name').innerText = currentUserProfile.name;
-        document.getElementById('user-avatar').innerText = user.first_name.charAt(0);
+        currentUser.id = tg.initDataUnsafe.user.id;
+        currentUser.name = tg.initDataUnsafe.user.first_name;
+        document.getElementById('user-name').innerText = currentUser.name;
+        document.getElementById('profile-fullname').innerText = currentUser.name;
+        document.getElementById('profile-telegram-id').innerText = "ID: " + currentUser.id;
       }
     }
 
-    document.getElementById('profile-fullname').innerText = currentUserProfile.name;
-    document.getElementById('profile-telegram-id').innerText = "ID: " + currentUserProfile.id;
-
     const BACKEND_URL = "https://cryptnexa-backend.onrender.com";
 
-    // 1. Soo jiidashada Qorshayaasha (Plans) ee Supabase
+    function switchTab(tabName) {
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById('sec-' + tabName).classList.add('active');
+      if(document.getElementById('nav-' + tabName)) {
+        document.getElementById('nav-' + tabName).classList.add('active');
+      }
+    }
+
     async function loadPlans() {
       try {
         let res = await fetch(`${BACKEND_URL}/api/plans`);
         let data = await res.json();
-        console.log("Plans loaded:", data.plans);
-      } catch (err) {
-        console.error("Error loading plans:", err);
+        let container = document.getElementById('plans-container');
+        if (data.plans && data.plans.length > 0) {
+          container.innerHTML = data.plans.map(p => `
+            <div style="background:var(--bg-color); padding:12px; border-radius:10px; margin-bottom:8px; border:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <strong style="font-size:14px;">${p.name}</strong>
+                <p style="font-size:11px; color:var(--text-muted);">Duration: ${p.duration_days} Days</p>
+              </div>
+              <div style="text-align:right;">
+                <span style="color:#10b981; font-weight:bold;">${p.daily_roi}% ROI</span>
+              </div>
+            </div>
+          `).join('');
+        } else {
+          container.innerHTML = `<p style="font-size:13px; color:var(--text-muted);">No plans found in database. Run SQL script in Supabase.</p>`;
+        }
+      } catch (e) {
+        console.error(e);
       }
     }
 
-    // 2. Abuurista Deposit-ka Dhabta ah (Real Deposit with Unique Decimal)
-    async function initiateRealDeposit() {
-      const amtInput = document.getElementById('deposit-amount-input').value;
-      const amt = parseFloat(amtInput);
-      
-      if (isNaN(amt) || amt <= 0) {
-        alert('Fadlan geli xaddiga saxda ah ee USDT!');
+    async function createRealDeposit() {
+      let amt = parseFloat(document.getElementById('deposit-amt').value);
+      if(isNaN(amt) || amt <= 0) {
+        alert('Fadlan geli xaddiga saxda ah!');
         return;
       }
 
-      // Xulashada plan_id (tusaale ahaan Starter plan waa 1)
-      let planId = 1; 
-
       try {
-        let response = await fetch(`${BACKEND_URL}/api/create-deposit`, {
+        let res = await fetch(`${BACKEND_URL}/api/create-deposit`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            telegram_id: parseInt(currentUserProfile.id),
-            amount: amt,
-            plan_id: planId
-          })
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ telegram_id: currentUser.id, amount: amt, plan_id: 1 })
         });
-
-        let result = await response.json();
-        if (response.ok) {
-          alert(`Dalabkii waa la sameeyay!\n\nFadlan ku soo dir xaddiga saxda ah ee: ${result.expected_amount} USDT shabakadda TRC20.\n\nKadib riix badhanka Xaqiijinta (Verify).`);
-          document.getElementById('tx-hash-input').value = `Send exact: ${result.expected_amount} USDT`;
+        let data = await res.json();
+        if(res.ok) {
+          document.getElementById('deposit-info-card').style.display = 'block';
+          document.getElementById('exact-amount-display').value = data.expected_amount + " USDT";
+          alert(data.message);
         } else {
-          alert('Khalad: ' + result.detail);
+          alert('Error: ' + data.detail);
         }
-      } catch (e) {
-        alert('Server-ka lama xiriiri karo: ' + e);
+      } catch(e) {
+        alert('Network error: ' + e);
       }
     }
 
-    // 3. Xaqiijinta Lacagta (Verify Deposit via Bybit API)
-    async function verifyRealDeposit() {
+    async function verifyBybitDeposit() {
       try {
-        let response = await fetch(`${BACKEND_URL}/api/verify-deposit?telegram_id=${currentUserProfile.id}`, {
-          method: 'POST'
-        });
-
-        let result = await response.json();
-        if (response.ok) {
-          alert(result.message);
-          backToWalletOverview();
+        let res = await fetch(`${BACKEND_URL}/api/verify-deposit?telegram_id=${currentUser.id}`, { method: 'POST' });
+        let data = await res.json();
+        if(res.ok) {
+          alert(data.message);
+          switchTab('home');
         } else {
-          alert(result.detail || 'Weli lama helin lacagta.');
+          alert(data.detail || 'Weli lama helin lacagta.');
         }
-      } catch (e) {
-        alert('Khalad ka dhacay xaqiijinta: ' + e);
+      } catch(e) {
+        alert('Error verifying: ' + e);
       }
     }
 
     loadPlans();
   </script>
+</body>
+</html>
