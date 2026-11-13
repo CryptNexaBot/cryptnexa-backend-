@@ -1,5 +1,7 @@
 fastapi
 uvicorn
+pydantic
 pybit
 supabase
-pydantic
+python-telegram-bot
+requests
