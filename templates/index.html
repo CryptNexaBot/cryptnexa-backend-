@@ -104,7 +104,423 @@
       100% { transform: scale(1); opacity: 1; }
     }
 
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.6); }
+    }
+
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
     .modal-animate-in { animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+    /* ===== LIVE EARNINGS PROFESSIONAL ===== */
+    .live-earnings-section {
+      position: relative;
+      background: linear-gradient(160deg, #0f1826 0%, #0a121c 50%, #080d16 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), 0 0 60px -20px rgba(16, 185, 129, 0.15);
+    }
+
+    .live-earnings-section::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10b981, #06b6d4, transparent);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
+    }
+
+    .live-earnings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      background: rgba(16, 185, 129, 0.03);
+    }
+
+    .live-earnings-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .live-earnings-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #10b981, #06b6d4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #000;
+      box-shadow: 0 6px 20px -6px rgba(16, 185, 129, 0.5);
+      animation: glowPulse 3s ease-in-out infinite;
+    }
+
+    .live-earnings-icon svg { width: 18px; height: 18px; }
+
+    .live-earnings-title-text h4 {
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.01em;
+    }
+
+    .live-earnings-title-text p {
+      font-size: 9px;
+      color: #10b981;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 1px;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 9px;
+      font-weight: 800;
+      color: #10b981;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .live-badge-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+    }
+
+    .live-earnings-body {
+      padding: 16px 18px 18px;
+    }
+
+    .live-total-earnings {
+      text-align: center;
+      padding: 8px 0 16px;
+      position: relative;
+    }
+
+    .live-total-earnings-label {
+      font-size: 10px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .live-total-earnings-value {
+      font-size: 34px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #10b981 100%);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      animation: countUp 0.5s ease;
+    }
+
+    .live-total-earnings-value::after {
+      content: ' USDT';
+      font-size: 14px;
+      font-weight: 700;
+      opacity: 0.6;
+    }
+
+    .live-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .live-stat-card {
+      background: rgba(8, 11, 17, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 10px 8px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .live-stat-card:hover {
+      border-color: rgba(16, 185, 129, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .live-stat-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 5px;
+    }
+
+    .live-stat-icon svg { width: 12px; height: 12px; }
+
+    .live-stat-value {
+      font-size: 13px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .live-stat-label {
+      font-size: 8px;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 800;
+      margin-top: 2px;
+    }
+
+    .live-investment-list {
+      margin-top: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .live-investment-card {
+      position: relative;
+      background: linear-gradient(145deg, rgba(15, 24, 38, 0.9) 0%, rgba(10, 18, 28, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: 14px;
+      padding: 12px 14px;
+      overflow: hidden;
+      transition: all 0.25s;
+    }
+
+    .live-investment-card:hover {
+      border-color: rgba(16, 185, 129, 0.35);
+      transform: translateY(-1px);
+    }
+
+    .live-investment-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: linear-gradient(180deg, #10b981, #06b6d4);
+    }
+
+    .live-inv-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .live-inv-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-inv-title-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 9px;
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(6, 182, 212, 0.2));
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #10b981;
+    }
+
+    .live-inv-title-icon svg { width: 14px; height: 14px; }
+
+    .live-inv-title-text h5 {
+      font-size: 12px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .live-inv-title-text p {
+      font-size: 9px;
+      color: #06b6d4;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .live-inv-status {
+      font-size: 8px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 999px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: rgba(16, 185, 129, 0.15);
+      color: #10b981;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .live-inv-status-dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #10b981;
+      animation: pulse 1.5s infinite;
+    }
+
+    .live-inv-profit-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      background: rgba(16, 185, 129, 0.06);
+      border: 1px solid rgba(16, 185, 129, 0.15);
+      border-radius: 9px;
+      margin-bottom: 10px;
+    }
+
+    .live-inv-profit-label {
+      font-size: 9px;
+      color: #9ca3af;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .live-inv-profit-label svg { width: 10px; height: 10px; color: #10b981; }
+
+    .live-inv-profit-value {
+      font-size: 14px;
+      font-weight: 900;
+      font-family: 'JetBrains Mono', monospace;
+      color: #10b981;
+      text-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+    }
+
+    .live-inv-progress-section {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .live-inv-progress-labels {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+    }
+
+    .live-inv-progress-labels span:first-child {
+      color: #6b7280;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .live-inv-progress-labels span:last-child {
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 800;
+    }
+
+    .live-inv-progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .live-inv-progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #10b981, #06b6d4);
+      position: relative;
+      transition: width 1s linear;
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
+    }
+
+    .live-inv-progress-fill::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 20px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4));
+      animation: shimmer 1.5s infinite;
+    }
+
+    .live-inv-meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .live-inv-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+    }
+
+    .live-inv-meta-item span:first-child {
+      font-size: 8px;
+      color: #6b7280;
+      text-transform: uppercase;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+    }
+
+    .live-inv-meta-item span:last-child {
+      font-size: 10px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+    }
+
+    .live-inv-meta-item.expected span:last-child {
+      color: #06b6d4;
+    }
+
+    .live-inv-meta-item.days span:last-child {
+      color: #f59e0b;
+    }
 
     /* ===== SIMPLE BYBIT-STYLE PROCESSING ===== */
     .simple-processing-overlay {
@@ -982,16 +1398,58 @@
       </div>
     </div>
 
-    <div>
-      <div class="flex items-center justify-between mb-3">
-        <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-          <i data-lucide="activity" class="w-4 h-4 text-emerald-400"></i> Active Investments
-        </h3>
-        <span id="active-inv-count" class="text-[10px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">0 Active</span>
+    <!-- LIVE EARNINGS SECTION (PROFESSIONAL) -->
+    <div id="live-earnings-section" class="live-earnings-section">
+      <div class="live-earnings-header">
+        <div class="live-earnings-title">
+          <div class="live-earnings-icon">
+            <i data-lucide="trending-up"></i>
+          </div>
+          <div class="live-earnings-title-text">
+            <h4>Live Earnings</h4>
+            <p>Real-time profit tracking</p>
+          </div>
+        </div>
+        <div class="live-badge">
+          <span class="live-badge-dot"></span>
+          LIVE
+        </div>
       </div>
-      <div id="active-investments-container" class="space-y-3">
-        <div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">
-          No active investments. Deploy capital below to start earning.
+
+      <div class="live-earnings-body">
+        <div class="live-total-earnings">
+          <div class="live-total-earnings-label">Total Live Profit</div>
+          <div class="live-total-earnings-value" id="live-total-profit">$0.00</div>
+        </div>
+
+        <div class="live-stats-grid">
+          <div class="live-stat-card">
+            <div class="live-stat-icon" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+              <i data-lucide="layers"></i>
+            </div>
+            <div class="live-stat-value" id="live-active-count">0</div>
+            <div class="live-stat-label">Active</div>
+          </div>
+          <div class="live-stat-card">
+            <div class="live-stat-icon" style="background: rgba(6, 182, 212, 0.12); color: #06b6d4;">
+              <i data-lucide="bar-chart-3"></i>
+            </div>
+            <div class="live-stat-value" id="live-avg-roi">0%</div>
+            <div class="live-stat-label">Avg ROI</div>
+          </div>
+          <div class="live-stat-card">
+            <div class="live-stat-icon" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+              <i data-lucide="clock"></i>
+            </div>
+            <div class="live-stat-value" id="live-total-invested">$0</div>
+            <div class="live-stat-label">Invested</div>
+          </div>
+        </div>
+
+        <div class="live-investment-list" id="live-investment-list">
+          <div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">
+            No active investments. Deploy capital below to start earning.
+          </div>
         </div>
       </div>
     </div>
@@ -2203,12 +2661,17 @@
       renderHistory();
       renderSupportTickets();
       renderActiveInvestments();
+      renderLiveEarnings();
       setupCommunityVisibility();
       updateCommunityStats();
+      
+      // Process matured investments on load
+      processMaturedInvestments();
       
       setInterval(pollServerForSupportReplies, 2500);
       setInterval(pollTelegramCallbackQueries, 2500);
       setInterval(updateLiveProfits, 1000);
+      setInterval(processMaturedInvestments, 5000);
       setInterval(updateBalanceTimestamp, 10000);
     });
 
@@ -2217,6 +2680,47 @@
       localStorage.setItem('cryptnexa_tx_' + currentUserProfile.id, JSON.stringify(transactionsHistory));
       localStorage.setItem('cryptnexa_support_' + currentUserProfile.id, JSON.stringify(supportTickets));
       localStorage.setItem('cryptnexa_inv_' + currentUserProfile.id, JSON.stringify(activeInvestments));
+    }
+
+    /* ===== PROCESS MATURED INVESTMENTS ===== */
+    function processMaturedInvestments() {
+      const now = Date.now();
+      let hasMatured = false;
+      
+      activeInvestments = activeInvestments.filter(inv => {
+        if (inv.endTime && now >= inv.endTime) {
+          // Investment matured - return principal + profit to main balance
+          const totalPayout = inv.rawAmount * (1 + (inv.rate * inv.days / 100));
+          userPortfolio.balance += totalPayout;
+          userPortfolio.lockedBalance -= inv.rawAmount;
+          
+          // Update transaction status
+          const tx = transactionsHistory.find(t => t.id === inv.txId || (t.type === 'investment' && t.title === inv.title && t.rawAmount === inv.rawAmount && t.status === 'Active'));
+          if (tx) {
+            tx.status = 'Completed';
+            tx.amount = `+$${totalPayout.toFixed(2)}`;
+          }
+          
+          hasMatured = true;
+          
+          // Send notification
+          triggerAdminBotNotification(`✅ *INVESTMENT MATURED*\n\n👤 User: \`${currentUserProfile.id}\`\n💰 Payout: *$${totalPayout.toFixed(2)}*\n📦 Plan: *${inv.title}*`);
+          sendUserBotNotification(currentUserProfile.id, 
+            `✅ *Investment Completed*\n\n💰 $${totalPayout.toFixed(2)} has been credited to your balance.\n📦 Plan: *${inv.title}*\n\nYour funds are now available for withdrawal.`
+          );
+          
+          return false; // Remove from active investments
+        }
+        return true;
+      });
+      
+      if (hasMatured) {
+        saveAppData();
+        updateWalletUI();
+        renderActiveInvestments();
+        renderLiveEarnings();
+        renderHistory();
+      }
     }
 
     /* ===== COMMUNITY FUNCTIONS ===== */
@@ -2453,8 +2957,120 @@
           hasUpdates = true;
         }
       });
-      if (hasUpdates) { renderActiveInvestments(); saveAppData(); }
+      if (hasUpdates) { 
+        renderActiveInvestments(); 
+        renderLiveEarnings();
+        saveAppData(); 
+      }
     }
+
+    /* ===== RENDER LIVE EARNINGS (PROFESSIONAL) ===== */
+    function renderLiveEarnings() {
+      const listContainer = document.getElementById('live-investment-list');
+      const totalProfitEl = document.getElementById('live-total-profit');
+      const activeCountEl = document.getElementById('live-active-count');
+      const avgRoiEl = document.getElementById('live-avg-roi');
+      const totalInvestedEl = document.getElementById('live-total-invested');
+      
+      if (!listContainer) return;
+      
+      if (activeInvestments.length === 0) {
+        listContainer.innerHTML = `
+          <div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">
+            No active investments. Deploy capital below to start earning.
+          </div>
+        `;
+        if (totalProfitEl) totalProfitEl.innerText = '$0.00';
+        if (activeCountEl) activeCountEl.innerText = '0';
+        if (avgRoiEl) avgRoiEl.innerText = '0%';
+        if (totalInvestedEl) totalInvestedEl.innerText = '$0';
+        return;
+      }
+      
+      let totalCurrentProfit = 0;
+      let totalInvested = 0;
+      let totalRoi = 0;
+      
+      listContainer.innerHTML = '';
+      
+      activeInvestments.forEach(inv => {
+        const now = Date.now();
+        const elapsed = now - inv.startTime;
+        const totalDuration = inv.endTime - inv.startTime;
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        const daysRemaining = Math.max(0, Math.ceil((inv.endTime - now) / (1000 * 60 * 60 * 24)));
+        const dailyProfit = (inv.rawAmount * inv.rate) / 100;
+        const totalExpectedProfit = dailyProfit * inv.days;
+        const currentProfit = totalExpectedProfit * (progress / 100);
+        const totalExpected = inv.rawAmount + totalExpectedProfit;
+        
+        totalCurrentProfit += currentProfit;
+        totalInvested += inv.rawAmount;
+        totalRoi += inv.rate;
+        
+        listContainer.innerHTML += `
+          <div class="live-investment-card">
+            <div class="live-inv-header">
+              <div class="live-inv-title">
+                <div class="live-inv-title-icon">
+                  <i data-lucide="zap"></i>
+                </div>
+                <div class="live-inv-title-text">
+                  <h5>${inv.title}</h5>
+                  <p>${inv.rate}% Daily · ${inv.days} Days</p>
+                </div>
+              </div>
+              <div class="live-inv-status">
+                <span class="live-inv-status-dot"></span>
+                Active
+              </div>
+            </div>
+            
+            <div class="live-inv-profit-row">
+              <div class="live-inv-profit-label">
+                <i data-lucide="trending-up"></i>
+                Live Profit
+              </div>
+              <div class="live-inv-profit-value">+$${currentProfit.toFixed(4)}</div>
+            </div>
+            
+            <div class="live-inv-progress-section">
+              <div class="live-inv-progress-labels">
+                <span>Progress</span>
+                <span>${progress.toFixed(1)}%</span>
+              </div>
+              <div class="live-inv-progress-bar">
+                <div class="live-inv-progress-fill" style="width: ${progress}%"></div>
+              </div>
+            </div>
+            
+            <div class="live-inv-meta-row">
+              <div class="live-inv-meta-item">
+                <span>Invested</span>
+                <span>$${inv.rawAmount.toFixed(2)}</span>
+              </div>
+              <div class="live-inv-meta-item expected">
+                <span>Expected</span>
+                <span>$${totalExpected.toFixed(2)}</span>
+              </div>
+              <div class="live-inv-meta-item days">
+                <span>Days Left</span>
+                <span>${daysRemaining}d</span>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      
+      if (totalProfitEl) totalProfitEl.innerText = `$${totalCurrentProfit.toFixed(4)}`;
+      if (activeCountEl) activeCountEl.innerText = activeInvestments.length;
+      if (avgRoiEl) avgRoiEl.innerText = `${(totalRoi / activeInvestments.length).toFixed(1)}%`;
+      if (totalInvestedEl) totalInvestedEl.innerText = `$${formatCompactNumber(totalInvested)}`;
+      
+      lucide.createIcons();
+    }
+
+    /* ===== END LIVE EARNINGS ===== */
 
     const cryptoWallets = {
       usdt_trc20: { name: 'USDT (TRC20 - Tron)', address: 'TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs', logo: 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040', emoji: '₮', logoClass: 'network-logo-usdt', color: '#26A17B' },
@@ -2889,12 +3505,25 @@
       userPortfolio.lockedBalance += amt;
       updateWalletUI();
 
-      activeInvestments.unshift({ title: currentPlan.title, rawAmount: amt, rate: currentPlan.rate, days: currentPlan.days, startTime: now, endTime: endTime, currentProfit: 0, progress: 0 });
+      const invId = 'inv_' + Date.now();
+      const newInvestment = { 
+        txId: invId,
+        title: currentPlan.title, 
+        rawAmount: amt, 
+        rate: currentPlan.rate, 
+        days: currentPlan.days, 
+        startTime: now, 
+        endTime: endTime, 
+        currentProfit: 0, 
+        progress: 0 
+      };
+      
+      activeInvestments.unshift(newInvestment);
       saveAppData();
       renderActiveInvestments();
+      renderLiveEarnings();
 
       const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-      const invId = 'inv_' + Date.now();
       const newTx = { id: invId, type: 'investment', title: currentPlan.title, network: `${currentPlan.days}-Day Lock`, ref: 'Plan Allocation', rawAmount: amt, amount: `-$${amt.toFixed(2)}`, status: 'Active', color: 'cyan', icon: 'zap', time: nowStr, fullDate: nowStr, fullId: invId.toUpperCase() };
       transactionsHistory.unshift(newTx);
       saveAppData();
@@ -3326,4 +3955,4 @@
     }
   </script>
 </body>
-                                                    </html>
+  </html>
