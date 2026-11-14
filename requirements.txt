@@ -4,6 +4,5 @@ Flask-Limiter
 python-dotenv
 PyJWT
 requests
-payerurl
 gunicorn
-
+binance-and-crypto-payment
