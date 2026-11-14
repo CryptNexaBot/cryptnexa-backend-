@@ -1882,6 +1882,8 @@
         if (data.token) {
           localStorage.setItem('jwt_token', data.token);
           console.log("Token kaydsan yahay!");
+        } else {
+          console.error("Login failed. Backend error:", data.error);
         }
       } catch (error) {
         console.error("Login Error:", error);
@@ -3068,4 +3070,4 @@
     }
   </script>
 </body>
-    </html>
+  </html>
