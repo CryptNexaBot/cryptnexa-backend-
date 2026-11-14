@@ -14,8 +14,8 @@ from flask_limiter.util import get_remote_address
 from urllib.parse import parse_qsl
 from dotenv import load_dotenv
 
-# PayerURL SDK
-from payerurl import CryptoPaymentClient, CryptoPaymentNotify
+# ✅ MAKTABADDA SAXDA AH EE PAYERURL
+from binance_and_crypto_payment import CryptoPaymentClient
 
 load_dotenv()
 
@@ -156,23 +156,21 @@ def deposit_auto():
 
 @app.route('/api/deposit/webhook', methods=['POST'])
 def deposit_webhook():
-    payload = request.get_data(as_text=True)
-    
     try:
-        notify = CryptoPaymentNotify(
-            public_key=PAYERURL_PUBLIC_KEY,
-            secret_key=PAYERURL_SECRET_KEY,
-            payload=payload
-        )
+        payload = request.json
+        if not payload:
+            return jsonify({"status": "error", "message": "No payload"}), 400
+
+        # PayerURL waxay soo dirtaa macluumaadkan
+        order_id = payload.get('order_id')
+        status = payload.get('status')
         
-        if notify.is_valid():
-            order_id = notify.order_id
-            amount_paid = float(notify.confirm_amount)
-            
-            # order_id format: DEP_USERID_TIMESTAMP
+        # Hubi xaaladda (Maktabadda cusub waxay isticmaashaa 'completed' ama 'success')
+        if status in ['completed', 'success', 'paid']:
             parts = order_id.split('_')
             if len(parts) >= 2:
                 user_id = parts[1]
+                amount_paid = float(payload.get('amount', 0))
                 
                 # Hubi in aysan horey u xaqiijin (Duplicate check)
                 if order_id not in db['transactions']:
@@ -194,7 +192,7 @@ def deposit_webhook():
                     send_tg_message(user_id, f"✅ *Auto Deposit Successful!*\n💰 +${amount_paid:.2f} added to your balance.")
                     send_tg_message(ADMIN_ID, f"💰 *AUTO DEPOSIT*\n👤 User: `{user_id}`\n💵 Amount: *${amount_paid:.2f}*")
             
-            return jsonify({"status": "success"}), 200
+        return jsonify({"status": "success"}), 200
             
     except Exception as e:
         print("Webhook Error:", e)
