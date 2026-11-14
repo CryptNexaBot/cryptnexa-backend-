@@ -114,6 +114,11 @@
       to { opacity: 1; transform: scale(1); }
     }
 
+    @keyframes glowPulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 35px rgba(16, 185, 129, 0.7); }
+    }
+
     .modal-animate-in { animation: modalFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
     /* ===== SIMPLE BYBIT-STYLE PROCESSING ===== */
@@ -929,21 +934,22 @@
       display: block;
     }
 
+    /* Compact Progress Bar */
     .deposit-progress-bar {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
-      padding: 0 6px;
+      margin-bottom: 20px;
+      padding: 0 10px;
       position: relative;
     }
 
     .deposit-progress-bar::before {
       content: '';
       position: absolute;
-      top: 17px;
-      left: 22px;
-      right: 22px;
+      top: 14px;
+      left: 26px;
+      right: 26px;
       height: 2px;
       background: rgba(255, 255, 255, 0.06);
       z-index: 0;
@@ -952,14 +958,14 @@
 
     .deposit-progress-fill {
       position: absolute;
-      top: 17px;
-      left: 22px;
+      top: 14px;
+      left: 26px;
       height: 2px;
       background: linear-gradient(90deg, #10b981, #06b6d4);
       z-index: 1;
       transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 2px;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.8), 0 0 30px rgba(6, 182, 212, 0.4);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.6);
     }
 
     .deposit-progress-step {
@@ -968,18 +974,18 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
       flex: 1;
     }
 
     .deposit-progress-dot {
-      width: 36px;
-      height: 36px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 900;
       background: linear-gradient(145deg, #1a2030 0%, #141927 100%);
       color: #6b7280;
@@ -991,7 +997,7 @@
       background: linear-gradient(135deg, #10b981, #06b6d4);
       color: #000;
       border-color: rgba(16, 185, 129, 0.6);
-      box-shadow: 0 0 25px rgba(16, 185, 129, 0.6), 0 0 50px rgba(6, 182, 212, 0.3);
+      box-shadow: 0 0 20px rgba(16, 185, 129, 0.6);
       transform: scale(1.1);
     }
 
@@ -999,26 +1005,25 @@
       background: linear-gradient(135deg, #10b981, #06b6d4);
       color: #000;
       border-color: #10b981;
-      box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
     }
 
     .deposit-progress-step.completed .deposit-progress-dot svg {
-      width: 16px;
-      height: 16px;
+      width: 14px;
+      height: 14px;
     }
 
     .deposit-progress-label {
-      font-size: 9px;
+      font-size: 8px;
       font-weight: 800;
       text-transform: uppercase;
-      letter-spacing: 0.06em;
+      letter-spacing: 0.05em;
       color: #6b7280;
       transition: color 0.3s;
     }
 
     .deposit-progress-step.active .deposit-progress-label {
       color: #10b981;
-      text-shadow: 0 0 12px rgba(16, 185, 129, 0.5);
     }
 
     .deposit-progress-step.completed .deposit-progress-label {
@@ -1182,23 +1187,25 @@
       font-family: 'JetBrains Mono', monospace;
     }
 
-    /* Address Card - Cinematic Compact */
+    /* Address Card - Premium Cinematic */
     .cinematic-address-card {
       background: linear-gradient(145deg, #0d1420 0%, #080d16 100%);
-      border: 1px solid rgba(16, 185, 129, 0.35);
+      border: 1px solid rgba(16, 185, 129, 0.4);
       border-radius: 18px;
       padding: 16px;
       position: relative;
       overflow: hidden;
-      box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.2);
+      box-shadow: 0 15px 40px -10px rgba(16, 185, 129, 0.3);
     }
 
     .cinematic-address-card::before {
       content: '';
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.8), transparent);
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #10b981, #06b6d4, #10b981, transparent);
+      background-size: 200% 100%;
+      animation: shimmer 3s infinite;
     }
 
     .address-label-row {
@@ -1232,8 +1239,8 @@
     }
 
     .address-value-box {
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(6, 182, 212, 0.05) 100%);
+      border: 1px solid rgba(16, 185, 129, 0.25);
       border-radius: 12px;
       padding: 14px;
       display: flex;
@@ -1250,6 +1257,7 @@
       line-height: 1.5;
       flex: 1;
       letter-spacing: 0.02em;
+      text-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
     }
 
     .btn-copy-cinematic {
@@ -1272,7 +1280,7 @@
 
     .btn-copy-cinematic:active { transform: scale(0.95); }
 
-    /* QR Card - Cinematic */
+    /* QR Card - Toggle */
     .cinematic-qr-card {
       background: linear-gradient(165deg, #0f1826 0%, #0a121c 60%, #080d16 100%);
       border: 1px solid rgba(16, 185, 129, 0.25);
@@ -1281,6 +1289,12 @@
       position: relative;
       overflow: hidden;
       box-shadow: 0 20px 60px -15px rgba(0, 0, 0, 0.8), 0 0 60px -20px rgba(6, 182, 212, 0.2);
+      display: none;
+    }
+
+    .cinematic-qr-card.show {
+      display: block;
+      animation: slideUpFade 0.4s ease;
     }
 
     .cinematic-qr-card::before {
@@ -1436,11 +1450,11 @@
       margin-top: 2px;
     }
 
-    /* Network Cards - Cinematic */
-    .network-card-cinematic {
+    /* Compact Network Cards - Professional */
+    .network-card-compact {
       position: relative;
-      border-radius: 18px;
-      padding: 16px 14px;
+      border-radius: 14px;
+      padding: 12px 10px;
       cursor: pointer;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       background: linear-gradient(145deg, #131a28 0%, #0d1420 100%);
@@ -1448,33 +1462,28 @@
       overflow: hidden;
     }
 
-    .network-card-cinematic:hover {
+    .network-card-compact:hover {
       border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-2px);
     }
 
-    .network-card-cinematic.active {
+    .network-card-compact.active {
       border-color: #10b981;
       background: linear-gradient(145deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.08) 100%);
-      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.5), 0 12px 32px -8px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.5), 0 8px 24px -6px rgba(16, 185, 129, 0.4);
     }
 
-    .network-card-cinematic.active .network-check-cinematic {
+    .network-card-compact.active .network-check-compact {
       opacity: 1;
       transform: scale(1);
     }
 
-    .network-card-cinematic.active .network-logo-cinematic {
-      transform: scale(1.05);
-      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5);
-    }
-
-    .network-check-cinematic {
+    .network-check-compact {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 22px;
-      height: 22px;
+      top: 6px;
+      right: 6px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       background: linear-gradient(135deg, #10b981, #06b6d4);
       display: flex;
@@ -1484,24 +1493,24 @@
       opacity: 0;
       transform: scale(0.3);
       transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+      box-shadow: 0 3px 10px rgba(16, 185, 129, 0.5);
       z-index: 5;
     }
 
-    .network-logo-cinematic {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
+    .network-logo-compact {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      flex-shrink: 0;
-      padding: 8px;
+      padding: 6px;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: 1px solid rgba(255,255,255,0.08);
+      margin: 0 auto 6px;
     }
 
-    .network-logo-cinematic img { width: 100%; height: 100%; object-fit: contain; }
+    .network-logo-compact img { width: 100%; height: 100%; object-fit: contain; }
 
     /* Success Card - Cinematic */
     .deposit-success-card-cinematic {
@@ -1588,6 +1597,102 @@
       box-shadow: 0 4px 16px -4px rgba(16, 185, 129, 0.3);
     }
 
+    /* Generating Overlay */
+    .generating-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .generating-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .generating-card {
+      width: 100%;
+      max-width: 280px;
+      background: linear-gradient(165deg, #131a28 0%, #0c1220 100%);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      border-radius: 24px;
+      padding: 36px 24px;
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.9), 0 0 60px -20px rgba(16, 185, 129, 0.3);
+    }
+
+    .generating-overlay.show .generating-card {
+      transform: scale(1);
+    }
+
+    .generating-spinner {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 20px;
+      border-radius: 50%;
+      border: 3px solid rgba(16, 185, 129, 0.15);
+      border-top-color: #10b981;
+      animation: spinSlow 0.8s linear infinite;
+      position: relative;
+    }
+
+    .generating-spinner::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border-radius: 50%;
+      border: 2px solid rgba(6, 182, 212, 0.15);
+      border-top-color: #06b6d4;
+      animation: spinSlow 1.2s linear infinite reverse;
+    }
+
+    .generating-title {
+      font-size: 15px;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .generating-subtitle {
+      font-size: 11px;
+      color: #9ca3af;
+    }
+
+    /* QR Toggle Button */
+    .qr-toggle-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .qr-toggle-btn:hover { background: rgba(16, 185, 129, 0.15); }
+    .qr-toggle-btn:active { transform: scale(0.98); }
+
+    @keyframes iconEnter { 0% { transform: scale(0.3) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+
     /* Bottom nav */
     .bottom-nav-new {
       position: fixed;
@@ -1665,8 +1770,6 @@
     .bottom-nav-item.active .bottom-nav-label {
       color: #10b981;
     }
-
-    @keyframes iconEnter { 0% { transform: scale(0.3) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
   </style>
 </head>
 <body class="font-sans antialiased pb-28">
@@ -2091,7 +2194,7 @@
         </div>
       </div>
 
-      <!-- Progress Bar -->
+      <!-- Compact Progress Bar -->
       <div class="deposit-progress-bar">
         <div class="deposit-progress-fill" id="deposit-progress-fill" style="width: 0%;"></div>
         
@@ -2113,7 +2216,7 @@
         </div>
       </div>
 
-      <!-- STEP 1: Network Selection -->
+      <!-- STEP 1: Network Selection (Compact & Professional) -->
       <div class="deposit-flow-step active" id="dep-step-1">
         <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
           <div class="deposit-step-header">
@@ -2124,56 +2227,48 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-2.5">
-            <div onclick="selectCryptoMethod('usdt_trc20')" id="card-usdt_trc20" class="network-card-cinematic active">
-              <div class="network-check-cinematic"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>
-              <div class="flex flex-col items-center text-center gap-2">
-                <div class="network-logo-cinematic network-logo-usdt">
-                  <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:20px\'>₮</span>'">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="text-xs font-black text-white leading-tight">USDT</h5>
-                  <p class="text-[10px] text-emerald-400 font-bold mt-0.5">TRC20</p>
-                </div>
+          <div class="grid grid-cols-4 gap-2">
+            <div onclick="selectCryptoMethod('usdt_trc20')" id="card-usdt_trc20" class="network-card-compact active">
+              <div class="network-check-compact"><i data-lucide="check" class="w-3 h-3"></i></div>
+              <div class="network-logo-compact network-logo-usdt">
+                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:16px\'>₮</span>'">
+              </div>
+              <div class="text-center">
+                <p class="text-[10px] font-black text-white leading-tight">USDT</p>
+                <p class="text-[8px] text-emerald-400 font-bold mt-0.5">TRC20</p>
               </div>
             </div>
 
-            <div onclick="selectCryptoMethod('usdt_bep20')" id="card-usdt_bep20" class="network-card-cinematic">
-              <div class="network-check-cinematic"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>
-              <div class="flex flex-col items-center text-center gap-2">
-                <div class="network-logo-cinematic network-logo-bnb">
-                  <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:20px\'>⚡</span>'">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="text-xs font-black text-white leading-tight">USDT</h5>
-                  <p class="text-[10px] text-amber-400 font-bold mt-0.5">BEP20</p>
-                </div>
+            <div onclick="selectCryptoMethod('usdt_bep20')" id="card-usdt_bep20" class="network-card-compact">
+              <div class="network-check-compact"><i data-lucide="check" class="w-3 h-3"></i></div>
+              <div class="network-logo-compact network-logo-bnb">
+                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:16px\'>⚡</span>'">
+              </div>
+              <div class="text-center">
+                <p class="text-[10px] font-black text-white leading-tight">USDT</p>
+                <p class="text-[8px] text-amber-400 font-bold mt-0.5">BEP20</p>
               </div>
             </div>
 
-            <div onclick="selectCryptoMethod('usdt_erc20')" id="card-usdt_erc20" class="network-card-cinematic">
-              <div class="network-check-cinematic"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>
-              <div class="flex flex-col items-center text-center gap-2">
-                <div class="network-logo-cinematic network-logo-eth">
-                  <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:20px\'>Ξ</span>'">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="text-xs font-black text-white leading-tight">USDT</h5>
-                  <p class="text-[10px] text-blue-400 font-bold mt-0.5">ERC20</p>
-                </div>
+            <div onclick="selectCryptoMethod('usdt_erc20')" id="card-usdt_erc20" class="network-card-compact">
+              <div class="network-check-compact"><i data-lucide="check" class="w-3 h-3"></i></div>
+              <div class="network-logo-compact network-logo-eth">
+                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:16px\'>Ξ</span>'">
+              </div>
+              <div class="text-center">
+                <p class="text-[10px] font-black text-white leading-tight">USDT</p>
+                <p class="text-[8px] text-blue-400 font-bold mt-0.5">ERC20</p>
               </div>
             </div>
 
-            <div onclick="selectCryptoMethod('ton')" id="card-ton" class="network-card-cinematic">
-              <div class="network-check-cinematic"><i data-lucide="check" class="w-3.5 h-3.5"></i></div>
-              <div class="flex flex-col items-center text-center gap-2">
-                <div class="network-logo-cinematic network-logo-ton">
-                  <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:20px\'>💎</span>'">
-                </div>
-                <div class="min-w-0">
-                  <h5 class="text-xs font-black text-white leading-tight">TON</h5>
-                  <p class="text-[10px] text-cyan-400 font-bold mt-0.5">Toncoin</p>
-                </div>
+            <div onclick="selectCryptoMethod('ton')" id="card-ton" class="network-card-compact">
+              <div class="network-check-compact"><i data-lucide="check" class="w-3 h-3"></i></div>
+              <div class="network-logo-compact network-logo-ton">
+                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:16px\'>💎</span>'">
+              </div>
+              <div class="text-center">
+                <p class="text-[10px] font-black text-white leading-tight">TON</p>
+                <p class="text-[8px] text-cyan-400 font-bold mt-0.5">TON</p>
               </div>
             </div>
           </div>
@@ -2257,7 +2352,7 @@
             </div>
           </div>
 
-          <!-- Address Copy Box - Compact Display -->
+          <!-- Address Card - Premium -->
           <div class="cinematic-address-card">
             <div class="address-label-row">
               <div class="address-label-left">
@@ -2269,7 +2364,7 @@
               </div>
             </div>
             <div class="address-value-box">
-              <span class="address-mono-text" id="address-compact-display">—</span>
+              <span class="address-mono-text" id="address-full-display">—</span>
               <button onclick="copyToClipboard('wallet-address-text')" class="btn-copy-cinematic">
                 <i data-lucide="copy" class="w-3 h-3"></i> Copy
               </button>
@@ -2277,8 +2372,14 @@
             <input type="text" id="wallet-address-text" readonly class="hidden">
           </div>
 
-          <!-- QR -->
-          <div class="cinematic-qr-card">
+          <!-- QR Toggle Button -->
+          <button onclick="toggleQrCode()" id="qr-toggle-btn" class="qr-toggle-btn">
+            <i data-lucide="qr-code" class="w-4 h-4"></i>
+            <span>Show QR Code</span>
+          </button>
+
+          <!-- QR Card (Hidden by default) -->
+          <div class="cinematic-qr-card" id="qr-code-container">
             <div class="qr-header">
               <i data-lucide="qr-code" class="w-4 h-4"></i>
               <span>Scan QR to Pay</span>
@@ -2877,7 +2978,7 @@
     </button>
   </main>
 
-  <!-- NEW BOTTOM NAV (VISIBLE) -->
+  <!-- NEW BOTTOM NAV -->
   <nav class="bottom-nav-new">
     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="bottom-nav-item active">
       <div class="bottom-nav-icon-wrap"><i data-lucide="layout-dashboard"></i></div>
@@ -2946,6 +3047,15 @@
         <span class="simple-processing-amount-label">AMOUNT</span>
         <span id="processing-amount-text" class="simple-processing-amount-value">$0.00</span>
       </div>
+    </div>
+  </div>
+
+  <!-- GENERATING ADDRESS OVERLAY -->
+  <div id="generating-overlay" class="generating-overlay">
+    <div class="generating-card">
+      <div class="generating-spinner"></div>
+      <h3 class="generating-title">Generating Address...</h3>
+      <p class="generating-subtitle">Please wait while we prepare your deposit address</p>
     </div>
   </div>
 
@@ -3137,12 +3247,7 @@
       }
     }
 
-    // Format address as compact (first 8 chars + *** + last 6 chars)
-    function formatCompactAddress(addr) {
-      if (!addr || addr.length < 20) return addr;
-      return addr.substring(0, 8) + '***' + addr.substring(addr.length - 6);
-    }
-
+    /* ===== GENERATE ADDRESS WITH LOADING ===== */
     function generateDepositAddress() {
       const amount = parseFloat(document.getElementById('deposit-amount-input').value);
       
@@ -3167,23 +3272,65 @@
       depositFlowState.generatedAt = now;
       depositFlowState.expiresAt = new Date(now.getTime() + DEPOSIT_EXPIRY_MINUTES * 60 * 1000);
       
-      document.getElementById('payment-amount-display').innerText = amount.toFixed(2);
-      document.getElementById('payment-network-display').innerText = networkData.name;
-      document.getElementById('wallet-address-text').value = networkData.address;
+      // Show generating overlay
+      const generatingOverlay = document.getElementById('generating-overlay');
+      generatingOverlay.classList.add('show');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
       
-      // Set compact display
-      document.getElementById('address-compact-display').innerText = formatCompactAddress(networkData.address);
+      // Simulate processing delay (2 seconds)
+      setTimeout(() => {
+        generatingOverlay.classList.remove('show');
+        
+        // Update UI with generated data
+        document.getElementById('payment-amount-display').innerText = amount.toFixed(2);
+        document.getElementById('payment-network-display').innerText = networkData.name;
+        document.getElementById('wallet-address-text').value = networkData.address;
+        
+        // Show FULL address (not compact) with special color
+        document.getElementById('address-full-display').innerText = networkData.address;
+        
+        const expiryStr = depositFlowState.expiresAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+        document.getElementById('payment-expiry-display').innerText = expiryStr;
+        
+        // QR image (will be shown when toggled)
+        document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(networkData.address)}&color=080b11&bgcolor=ffffff`;
+        document.getElementById('warning-net-name').innerText = networkData.name;
+        
+        // Reset QR toggle to hidden
+        const qrContainer = document.getElementById('qr-code-container');
+        if (qrContainer) qrContainer.classList.remove('show');
+        const qrBtn = document.getElementById('qr-toggle-btn');
+        if (qrBtn) {
+          qrBtn.innerHTML = '<i data-lucide="qr-code" class="w-4 h-4"></i><span>Show QR Code</span>';
+          lucide.createIcons();
+        }
+        
+        goToDepositStep(3);
+        startDepositTimer();
+        
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      }, 2000);
+    }
+
+    /* ===== QR TOGGLE ===== */
+    function toggleQrCode() {
+      const qrContainer = document.getElementById('qr-code-container');
+      const qrBtn = document.getElementById('qr-toggle-btn');
       
-      const expiryStr = depositFlowState.expiresAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-      document.getElementById('payment-expiry-display').innerText = expiryStr;
+      if (!qrContainer || !qrBtn) return;
       
-      document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(networkData.address)}&color=080b11&bgcolor=ffffff`;
-      document.getElementById('warning-net-name').innerText = networkData.name;
+      const isShown = qrContainer.classList.contains('show');
       
-      goToDepositStep(3);
-      startDepositTimer();
+      if (isShown) {
+        qrContainer.classList.remove('show');
+        qrBtn.innerHTML = '<i data-lucide="qr-code" class="w-4 h-4"></i><span>Show QR Code</span>';
+      } else {
+        qrContainer.classList.add('show');
+        qrBtn.innerHTML = '<i data-lucide="eye-off" class="w-4 h-4"></i><span>Hide QR Code</span>';
+      }
       
-      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      lucide.createIcons();
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
     }
 
     function startDepositTimer() {
@@ -3333,6 +3480,13 @@
       if (paidBtn) {
         paidBtn.disabled = false;
         paidBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4"></i> I Have Paid';
+      }
+      
+      const qrContainer = document.getElementById('qr-code-container');
+      if (qrContainer) qrContainer.classList.remove('show');
+      const qrBtn = document.getElementById('qr-toggle-btn');
+      if (qrBtn) {
+        qrBtn.innerHTML = '<i data-lucide="qr-code" class="w-4 h-4"></i><span>Show QR Code</span>';
       }
       
       goToDepositStep(1);
@@ -4375,4 +4529,4 @@
     }
   </script>
 </body>
-                                             </html>
+  </html>
