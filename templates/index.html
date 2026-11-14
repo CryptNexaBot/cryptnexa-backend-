@@ -464,6 +464,43 @@
       line-height: 1.5;
     }
 
+    .pro-receipt-network-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px;
+      margin: 8px 0;
+    }
+
+    .pro-receipt-network-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px;
+      background: #0d1220;
+      border: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+
+    .pro-receipt-network-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .pro-receipt-network-name {
+      font-size: 10px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     .pro-receipt-footer {
       padding: 12px 20px 16px;
       background: rgba(8, 11, 17, 0.6);
@@ -539,13 +576,18 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
-      font-size: 18px;
-      font-weight: 800;
+      padding: 8px;
     }
 
-    .pro-history-icon.deposit { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
-    .pro-history-icon.withdraw { background: rgba(6, 182, 212, 0.12); color: #06b6d4; border: 1px solid rgba(6, 182, 212, 0.2); }
-    .pro-history-icon.investment { background: rgba(168, 85, 247, 0.12); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.2); }
+    .pro-history-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .pro-history-icon.deposit { background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.2); }
+    .pro-history-icon.withdraw { background: rgba(6, 182, 212, 0.12); border: 1px solid rgba(6, 182, 212, 0.2); }
+    .pro-history-icon.investment { background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.2); }
 
     .pro-history-title { font-size: 12px; font-weight: 700; color: #ffffff; line-height: 1.3; }
     .pro-history-subtitle { font-size: 10px; color: #6b7280; font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
@@ -1137,24 +1179,25 @@
       margin-bottom: 6px;
     }
 
+    /* WhatsApp-style amount font (Roboto/Helvetica-like clean sans) */
     .payment-amount-hero-value {
-      font-size: 30px;
-      font-weight: 900;
-      font-family: 'JetBrains Mono', monospace;
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+      font-size: 34px;
+      font-weight: 700;
       background: linear-gradient(135deg, #10b981 0%, #06b6d4 50%, #10b981 100%);
       background-size: 200% auto;
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
-      letter-spacing: -0.03em;
+      letter-spacing: -0.01em;
       line-height: 1;
       filter: drop-shadow(0 0 15px rgba(16, 185, 129, 0.4));
     }
 
     .payment-amount-hero-value::after {
       content: ' USDT';
-      font-size: 13px;
-      opacity: 0.5;
-      font-weight: 700;
+      font-size: 14px;
+      opacity: 0.55;
+      font-weight: 600;
     }
 
     .payment-detail-row {
@@ -1183,6 +1226,43 @@
     .payment-detail-value {
       font-size: 11px;
       font-weight: 800;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Network Logo in payment card */
+    .payment-network-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px 4px 4px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .payment-network-badge-logo {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3px;
+      background: #0d1220;
+      border: 1px solid rgba(255,255,255,0.08);
+      flex-shrink: 0;
+    }
+
+    .payment-network-badge-logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .payment-network-badge-name {
+      font-size: 10px;
+      font-weight: 700;
       color: #fff;
       font-family: 'JetBrains Mono', monospace;
     }
@@ -1247,10 +1327,9 @@
       gap: 10px;
     }
 
-    /* Updated: address text white, monospace, centered */
     .address-mono-text {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
       color: #ffffff;
       letter-spacing: 0.05em;
@@ -2343,7 +2422,12 @@
               <span class="payment-detail-label">
                 <i data-lucide="network" class="w-3 h-3"></i> Network
               </span>
-              <span class="payment-detail-value" id="payment-network-display">USDT (TRC20)</span>
+              <div class="payment-network-badge" id="payment-network-badge">
+                <div class="payment-network-badge-logo">
+                  <img id="payment-network-logo" src="" alt="">
+                </div>
+                <span class="payment-network-badge-name" id="payment-network-display">USDT (TRC20)</span>
+              </div>
             </div>
 
             <div class="payment-detail-row">
@@ -2354,7 +2438,7 @@
             </div>
           </div>
 
-          <!-- Address Card - Compact Premium (updated: smaller font, white text, centered) -->
+          <!-- Address Card -->
           <div class="cinematic-address-card">
             <div class="address-label-row">
               <div class="address-label-left">
@@ -2365,8 +2449,11 @@
                 <i data-lucide="shield-check" class="w-3 h-3"></i>
               </div>
             </div>
-            <div class="address-value-box" style="justify-content: center;">
-              <span class="address-mono-text" id="address-compact-display" style="font-size: 12px; text-align: center; color: #ffffff;">—</span>
+            <div class="address-value-box">
+              <span class="address-mono-text" id="address-compact-display">—</span>
+              <button onclick="copyDepositAddress()" class="btn-copy-cinematic">
+                <i data-lucide="copy" class="w-3 h-3"></i> Copy
+              </button>
             </div>
             <input type="text" id="wallet-address-text" readonly class="hidden">
           </div>
@@ -2451,7 +2538,7 @@
         </div>
       </div>
 
-      <!-- STEP 5: Success (Text updated: removed "admin review", professional) -->
+      <!-- STEP 5: Success -->
       <div class="deposit-flow-step" id="dep-step-5">
         <div class="deposit-success-card-cinematic">
           <div class="deposit-success-icon-cinematic">
@@ -3248,7 +3335,20 @@
 
     function formatCompactAddress(addr) {
       if (!addr || addr.length < 20) return addr;
-      return addr.substring(0, 4) + '******' + addr.substring(addr.length - 5);
+      return addr.substring(0, 6) + '•••••' + addr.substring(addr.length - 6);
+    }
+
+    function copyDepositAddress() {
+      const address = document.getElementById('wallet-address-text').value;
+      if (!address) return;
+      navigator.clipboard.writeText(address);
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      showModernAlert({ 
+        title: 'Address Copied', 
+        message: 'The deposit address has been copied to your clipboard.', 
+        type: 'success', 
+        icon: 'copy' 
+      });
     }
 
     function generateDepositAddress() {
@@ -3282,7 +3382,14 @@
       setTimeout(() => {
         generatingOverlay.classList.remove('show');
         
+        // Update amount with WhatsApp-style font
         document.getElementById('payment-amount-display').innerText = amount.toFixed(2);
+        
+        // Set network logo (official network icon)
+        const networkLogoEl = document.getElementById('payment-network-logo');
+        networkLogoEl.src = networkData.logo;
+        networkLogoEl.alt = networkData.name;
+        
         document.getElementById('payment-network-display').innerText = networkData.name;
         document.getElementById('wallet-address-text').value = networkData.address;
         
@@ -3423,6 +3530,8 @@
       
       const txObj = {
         id: txId, type: 'deposit', title: 'Crypto Deposit', network: networkName,
+        networkKey: depositFlowState.selectedNetwork,
+        networkLogo: networkData.logo,
         ref: hash ? 'TxID: ' + hash.substring(0, 8) + '...' : 'Screenshot: ' + fileDisplayName,
         rawAmount: amount, amount: `+$${amount.toFixed(2)}`,
         status: 'Pending Review', color: 'emerald', icon: 'arrow-down-left',
@@ -3878,6 +3987,8 @@
       if (tx.status === 'Rejected' && isDeposit) { amountClass = 'negative'; amountPrefix = ''; }
 
       let networkName = tx.network || 'USDT (TRC20)';
+      let networkKey = tx.networkKey || 'usdt_trc20';
+      let networkLogo = cryptoWallets[networkKey]?.logo || 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040';
       let rawAmount = tx.rawAmount || parseFloat((tx.amount || '0').replace(/[^0-9.]/g, '')) || 0;
       const receiptDate = tx.fullDate || new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
       const fullAddress = tx.fullAddress || tx.ref || 'N/A';
@@ -3895,9 +4006,11 @@
             <div class="pro-receipt-status-badge ${statusBadgeClass}">${tx.status === 'Pending Review' ? 'Pending Review' : tx.status}</div>
           </div>
           <div class="pro-receipt-body">
-            <div class="pro-receipt-row">
-              <span class="pro-receipt-row-label">Network</span>
-              <span class="pro-receipt-row-value" style="font-size:10px;">${networkName}</span>
+            <div class="pro-receipt-network-box">
+              <div class="pro-receipt-network-logo">
+                <img src="${networkLogo}" alt="${networkName}" onerror="this.style.display='none'">
+              </div>
+              <span class="pro-receipt-network-name">${networkName}</span>
             </div>
             <div class="pro-receipt-row">
               <span class="pro-receipt-row-label">Date</span>
@@ -3970,13 +4083,34 @@
       }
 
       transactionsHistory.forEach(tx => {
-        let iconEmoji = '₮';
+        let iconHTML = '';
         let iconClass = 'deposit';
         let amountClass = 'positive';
         let amountPrefix = '+';
+        let networkLogo = '';
+        let networkKey = tx.networkKey || 'usdt_trc20';
 
-        if (tx.type === 'withdraw') { iconEmoji = '↑'; iconClass = 'withdraw'; amountClass = 'negative'; amountPrefix = '-'; }
-        else if (tx.type === 'investment') { iconEmoji = '📈'; iconClass = 'investment'; amountClass = 'neutral'; amountPrefix = '-'; }
+        // Determine network logo
+        if (tx.type === 'deposit' || tx.type === 'withdraw') {
+          networkLogo = cryptoWallets[networkKey]?.logo || 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040';
+        }
+
+        if (tx.type === 'withdraw') { 
+          iconClass = 'withdraw'; 
+          amountClass = 'negative'; 
+          amountPrefix = '-'; 
+        }
+        else if (tx.type === 'investment') { 
+          iconClass = 'investment'; 
+          amountClass = 'neutral'; 
+          amountPrefix = '-'; 
+          iconHTML = '<i data-lucide="zap" class="w-5 h-5"></i>';
+        }
+
+        // For deposit/withdraw, use network logo. For investment, use zap icon
+        if (tx.type === 'deposit' || tx.type === 'withdraw') {
+          iconHTML = `<img src="${networkLogo}" alt="${tx.network || 'USDT'}" onerror="this.style.display='none'">`;
+        }
 
         let statusClass = 'pending';
         let statusText = 'Pending';
@@ -3991,7 +4125,7 @@
         container.innerHTML += `
           <div class="pro-history-card" onclick="openReceiptModal('${tx.id}')">
             <div class="flex items-start gap-3">
-              <div class="pro-history-icon ${iconClass}">${iconEmoji}</div>
+              <div class="pro-history-icon ${iconClass}">${iconHTML}</div>
               <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-2">
                   <div class="min-w-0">
@@ -4271,6 +4405,7 @@
       
       const txObj = {
         id: txId, type: 'withdraw', title: 'Crypto Withdrawal', network: netName,
+        networkKey: selectedWithdrawNetworkKey,
         ref: 'To: ' + shortAddr, rawAmount: amt, amount: `-$${amt.toFixed(2)}`,
         status: 'Pending Review', color: 'cyan', icon: 'arrow-up-right',
         time: nowStr, fullDate: nowStr, fullId: 'WDR-' + txId.toUpperCase().slice(-12),
