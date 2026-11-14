@@ -910,63 +910,6 @@
 
     .verified-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); letter-spacing: 0.03em; text-transform: uppercase; }
 
-    /* ===== MINING-STYLE AMOUNT CARD ===== */
-    .mining-amount-card {
-      background: linear-gradient(160deg, #0f1826 0%, #0a121c 60%, #080d16 100%);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      border-radius: 20px;
-      padding: 18px 16px;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 15px 50px -20px rgba(16, 185, 129, 0.25);
-    }
-    .mining-amount-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: linear-gradient(90deg, #10b981, #06b6d4);
-      opacity: 0.9;
-    }
-    .mining-amount-card:focus-within {
-      border-color: rgba(16, 185, 129, 0.5);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 15px 50px -20px rgba(16, 185, 129, 0.35);
-    }
-    .mining-amount-input {
-      background: transparent;
-      border: none;
-      font-size: 30px;
-      font-weight: 900;
-      font-family: 'JetBrains Mono', monospace;
-      color: #fff;
-      width: 100%;
-      letter-spacing: -0.02em;
-      outline: none;
-    }
-    .mining-amount-input::placeholder { color: #374151; }
-    .mining-amount-input::-webkit-outer-spin-button,
-    .mining-amount-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-    .mining-amount-input[type=number] { -moz-appearance: textfield; }
-
-    .mining-quick-chip {
-      padding: 9px 4px;
-      border-radius: 10px;
-      background: rgba(16, 185, 129, 0.06);
-      border: 1px solid rgba(16, 185, 129, 0.2);
-      font-size: 11px;
-      font-weight: 900;
-      color: #10b981;
-      font-family: 'JetBrains Mono', monospace;
-      transition: all 0.15s;
-      cursor: pointer;
-    }
-    .mining-quick-chip:hover {
-      background: rgba(16, 185, 129, 0.15);
-      border-color: rgba(16, 185, 129, 0.4);
-      transform: translateY(-1px);
-    }
-    .mining-quick-chip:active { transform: scale(0.95); }
-
     @keyframes iconEnter { 0% { transform: scale(0.3) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
   </style>
 </head>
@@ -1375,7 +1318,7 @@
       </div>
     </div>
 
-    <!-- ===== DEPOSIT (MINING STYLE) ===== -->
+    <!-- DEPOSIT -->
     <div id="section-deposit" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <button onclick="backToWalletOverview()" class="text-xs text-emerald-400 flex items-center gap-1.5 font-bold bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-lg border border-emerald-500/20 transition-all">
@@ -1395,39 +1338,10 @@
         </div>
       </div>
 
-      <!-- Amount Card -->
-      <div class="mining-amount-card">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Deposit Amount</span>
-          <div class="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-md">
-            <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i>
-            <span class="text-[10px] text-emerald-400 font-black font-mono">USDT</span>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input type="number" id="deposit-amount-input" placeholder="0.00" class="mining-amount-input" inputmode="decimal">
-          <span class="text-2xl font-black text-emerald-400 font-mono shrink-0">USDT</span>
-        </div>
-
-        <div class="flex items-center justify-between mt-2">
-          <span class="text-[10px] text-gray-500 font-mono">Min: <span class="text-gray-300 font-bold">$5.00</span></span>
-          <span class="text-[10px] text-gray-500 font-mono">≈ <span id="deposit-fiat-preview" class="text-emerald-400 font-bold">$0.00</span> USD</span>
-        </div>
-
-        <div class="grid grid-cols-4 gap-2 mt-4">
-          <button onclick="setDepositQuickAmount(50)" class="mining-quick-chip">$50</button>
-          <button onclick="setDepositQuickAmount(100)" class="mining-quick-chip">$100</button>
-          <button onclick="setDepositQuickAmount(500)" class="mining-quick-chip">$500</button>
-          <button onclick="setDepositQuickAmount(1000)" class="mining-quick-chip">$1K</button>
-        </div>
-      </div>
-
-      <!-- Network Selector -->
-      <div class="glass-card rounded-2xl p-4 border border-white/5">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Select Network</span>
-          <span class="text-[10px] text-emerald-400 font-mono font-bold">4 AVAILABLE</span>
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Select Network</span>
+          <span class="text-[10px] text-emerald-400 font-mono font-bold">USDT</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -1485,25 +1399,36 @@
         </div>
       </div>
 
-      <!-- Deposit Address Card -->
-      <div class="glass-card rounded-2xl p-4 border border-emerald-500/20 space-y-3">
-        <div class="flex items-center justify-between pb-2 border-b border-white/5">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-            <i data-lucide="qr-code" class="w-3 h-3 text-emerald-400"></i> Deposit Address
-          </span>
-          <span id="selected-network-badge" class="text-[9px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-md font-mono font-bold">USDT (TRC20)</span>
+      <div class="bybit-amount-box">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Amount</span>
+          <span class="text-[10px] text-gray-500 font-mono">Min $5.00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-black text-gray-500 font-mono">$</span>
+          <input type="number" id="deposit-amount-input" placeholder="0.00" class="bybit-amount-input" inputmode="decimal">
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="setDepositQuickAmount(50)" class="quick-chip">$50</button>
+          <button onclick="setDepositQuickAmount(100)" class="quick-chip">$100</button>
+          <button onclick="setDepositQuickAmount(500)" class="quick-chip">$500</button>
+          <button onclick="setDepositQuickAmount(1000)" class="quick-chip">$1K</button>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">Network</span>
+          <span id="selected-network-badge" class="text-emerald-400 font-black font-mono text-[11px]">USDT (TRC20)</span>
         </div>
 
-        <div class="qr-frame mx-auto" style="width:fit-content;">
-          <div>
-            <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs&color=080b11&bgcolor=ffffff" alt="QR" class="w-36 h-36 rounded-md">
+        <div class="address-display p-3 space-y-2">
+          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase font-bold">
+            <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i> Deposit Address
           </div>
-        </div>
-
-        <div class="address-display p-3">
           <div class="flex items-center gap-2">
-            <input type="text" id="wallet-address-text" readonly value="TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs" class="bg-transparent text-[10px] text-emerald-400 font-mono font-bold w-full focus:outline-none tracking-tight">
-            <button onclick="copyToClipboard('wallet-address-text')" class="px-2.5 py-1.5 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-black rounded-md text-[9px] shrink-0 flex items-center gap-1 active:scale-95 transition-all">
+            <input type="text" id="wallet-address-text" readonly value="TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs" class="bg-transparent text-[11px] text-emerald-400 font-mono font-bold w-full focus:outline-none tracking-tight">
+            <button onclick="copyToClipboard('wallet-address-text')" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-black rounded-lg text-[10px] shrink-0 flex items-center gap-1 active:scale-95 transition-all">
               <i data-lucide="copy" class="w-3 h-3"></i> COPY
             </button>
           </div>
@@ -1512,23 +1437,27 @@
         <div class="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
           <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
           <div class="text-[10px] leading-relaxed text-amber-200/90">
-            Send only <strong class="text-white" id="warning-net-name">USDT (TRC20)</strong> to this address. Wrong network = <strong class="text-amber-400">permanent loss</strong>.
+            Send only <strong class="text-white" id="warning-net-name">USDT (TRC20)</strong>. Wrong network = <strong class="text-amber-400">permanent loss</strong>.
+          </div>
+        </div>
+
+        <button onclick="toggleDepositQr()" id="qr-toggle-btn" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all">
+          <i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code
+        </button>
+
+        <div id="deposit-qr-container" class="pt-1 flex flex-col items-center justify-center hidden">
+          <div class="qr-frame">
+            <div>
+              <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs&color=080b11&bgcolor=ffffff" alt="QR" class="w-40 h-40 rounded-md">
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Proof of Payment -->
       <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
-        <div class="flex items-center justify-between pb-2 border-b border-white/5">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-            <i data-lucide="receipt" class="w-3 h-3 text-cyan-400"></i> Proof of Payment
-          </span>
-          <span class="text-[9px] text-gray-500 font-mono">REQUIRED</span>
-        </div>
-
-        <div>
-          <label class="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1.5 mb-1.5">
-            <i data-lucide="hash" class="w-3 h-3 text-emerald-400"></i> Transaction ID (TxID)
+        <div class="space-y-2">
+          <label class="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1.5">
+            <i data-lucide="hash" class="w-3 h-3 text-emerald-400"></i> TxID (Proof of Payment)
           </label>
           <input type="text" id="tx-hash-input" placeholder="Paste transaction hash..." class="input-safe w-full bg-brand-bg border border-white/10 rounded-xl p-3 text-[11px] text-white font-mono focus:border-emerald-500/50">
         </div>
@@ -1546,30 +1475,14 @@
         </div>
       </div>
 
-      <!-- Summary Card -->
-      <div class="glass-card rounded-2xl p-4 border border-emerald-500/20 space-y-2">
-        <div class="bybit-info-row">
-          <span class="bybit-info-label">Deposit Amount</span>
-          <span id="deposit-summary-amount" class="bybit-info-value text-emerald-400">$0.00</span>
-        </div>
-        <div class="bybit-info-row">
-          <span class="bybit-info-label">Network Fee</span>
-          <span class="bybit-info-value text-emerald-400">$0.00</span>
-        </div>
-        <div class="bybit-info-row">
-          <span class="bybit-info-label">You Will Receive</span>
-          <span id="deposit-summary-receive" class="text-xl font-black text-emerald-400 font-mono">$0.00</span>
-        </div>
-      </div>
-
       <button onclick="initiateDepositProcess()" class="w-full relative overflow-hidden rounded-xl font-extrabold shadow-lg active:scale-95 transition-all">
         <span class="block gradient-bg px-4 py-3.5 text-black text-sm font-black tracking-wide flex items-center justify-center gap-2">
-          <i data-lucide="shield-check" class="w-4 h-4"></i> CONFIRM DEPOSIT
+          <i data-lucide="shield-check" class="w-4 h-4"></i> SUBMIT DEPOSIT
         </span>
       </button>
     </div>
 
-    <!-- ===== WITHDRAW (MINING STYLE) ===== -->
+    <!-- WITHDRAW -->
     <div id="section-withdraw" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <button onclick="backToWalletOverview()" class="text-xs text-cyan-400 flex items-center gap-1.5 font-bold bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-2 rounded-lg border border-cyan-500/20 transition-all">
@@ -1587,49 +1500,18 @@
         </div>
       </div>
 
-      <!-- Available Balance Card -->
-      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20 bg-gradient-to-br from-cyan-500/5 to-transparent">
+      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20">
         <div class="flex items-center justify-between">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Available Balance</span>
-          <i data-lucide="wallet" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Available</span>
+          <span class="text-[10px] text-cyan-400 font-mono">USD</span>
         </div>
         <h3 class="text-2xl font-black text-white font-mono mt-1" id="withdraw-max-label-2">$0.00</h3>
-        <p class="text-[10px] text-gray-500 font-mono mt-0.5">Available for withdrawal</p>
       </div>
 
-      <!-- Amount Card -->
-      <div class="mining-amount-card">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Withdrawal Amount</span>
-          <div class="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/20 px-2 py-1 rounded-md">
-            <i data-lucide="arrow-up-right" class="w-3 h-3 text-cyan-400"></i>
-            <span class="text-[10px] text-cyan-400 font-black font-mono">USDT</span>
-          </div>
-        </div>
-
-        <div class="flex items-center gap-2">
-          <input type="number" id="withdraw-amount" placeholder="0.00" oninput="calculateWithdrawFee()" class="mining-amount-input" inputmode="decimal">
-          <span class="text-2xl font-black text-cyan-400 font-mono shrink-0">USDT</span>
-        </div>
-
-        <div class="flex items-center justify-between mt-2">
-          <span class="text-[10px] text-gray-500 font-mono">Min: <span class="text-gray-300 font-bold">$5.00</span></span>
-          <button onclick="setMaxWithdraw()" class="text-[10px] font-black text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2.5 py-1 rounded-md">MAX</button>
-        </div>
-
-        <div class="grid grid-cols-4 gap-2 mt-4">
-          <button onclick="setWithdrawQuickAmount(50)" class="mining-quick-chip">$50</button>
-          <button onclick="setWithdrawQuickAmount(100)" class="mining-quick-chip">$100</button>
-          <button onclick="setWithdrawQuickAmount(500)" class="mining-quick-chip">$500</button>
-          <button onclick="setMaxWithdraw()" class="mining-quick-chip">MAX</button>
-        </div>
-      </div>
-
-      <!-- Network Selector -->
-      <div class="glass-card rounded-2xl p-4 border border-white/5">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider">Select Network</span>
-          <span class="text-[10px] text-cyan-400 font-mono font-bold">4 AVAILABLE</span>
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+        <div class="flex items-center justify-between">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Select Network</span>
+          <span class="text-[10px] text-cyan-400 font-mono font-bold">USDT</span>
         </div>
 
         <div class="grid grid-cols-2 gap-2">
@@ -1684,16 +1566,34 @@
         </div>
       </div>
 
-      <!-- Destination Address -->
+      <div class="bybit-amount-box">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[10px] text-gray-400 uppercase font-bold">Withdrawal Amount</span>
+          <span class="text-[10px] text-gray-500 font-mono">Min $5.00</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-2xl font-black text-gray-500 font-mono">$</span>
+          <input type="number" id="withdraw-amount" placeholder="0.00" oninput="calculateWithdrawFee()" class="bybit-amount-input" inputmode="decimal">
+          <button onclick="setMaxWithdraw()" class="text-[10px] font-black text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-3 py-1.5 rounded-lg shrink-0">MAX</button>
+        </div>
+        <div class="flex gap-2 mt-3">
+          <button onclick="setWithdrawQuickAmount(50)" class="quick-chip">$50</button>
+          <button onclick="setWithdrawQuickAmount(100)" class="quick-chip">$100</button>
+          <button onclick="setWithdrawQuickAmount(500)" class="quick-chip">$500</button>
+          <button onclick="setMaxWithdraw()" class="quick-chip">MAX</button>
+        </div>
+      </div>
+
       <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
-        <div class="flex items-center justify-between pb-2 border-b border-white/5">
-          <span class="text-[10px] text-gray-400 uppercase font-bold tracking-wider flex items-center gap-1.5">
-            <i data-lucide="wallet" class="w-3 h-3 text-cyan-400"></i> Destination Address
-          </span>
-          <span id="withdraw-network-label" class="text-[9px] bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2 py-0.5 rounded-md font-mono font-bold">TRC20</span>
+        <div class="bybit-info-row">
+          <span class="bybit-info-label">Network</span>
+          <span id="withdraw-network-label" class="text-[10px] bg-cyan-500/10 text-cyan-400 px-2 py-0.5 rounded font-mono font-bold">TRC20</span>
         </div>
 
-        <div class="address-display p-3">
+        <div class="address-display p-3 space-y-2">
+          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase font-bold">
+            <i data-lucide="wallet" class="w-3 h-3 text-cyan-400"></i> Destination Address
+          </div>
           <input type="text" id="withdraw-address" placeholder="Paste wallet address..." class="input-safe w-full bg-transparent text-[11px] text-white font-mono focus:outline-none tracking-tight placeholder-gray-600">
         </div>
 
@@ -1705,18 +1605,13 @@
         </div>
       </div>
 
-      <!-- Summary Card -->
-      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20 space-y-2">
-        <div class="bybit-info-row">
-          <span class="bybit-info-label">Withdrawal Amount</span>
-          <span id="withdraw-summary-amount" class="bybit-info-value text-white">$0.00</span>
-        </div>
+      <div class="glass-card rounded-2xl p-4 border border-cyan-500/20">
         <div class="bybit-info-row">
           <span class="bybit-info-label">Network Fee</span>
           <span class="bybit-info-value text-emerald-400">$0.00</span>
         </div>
         <div class="bybit-info-row">
-          <span class="bybit-info-label">You Will Receive</span>
+          <span class="bybit-info-label">You Receive</span>
           <span id="net-receive-text" class="text-xl font-black text-cyan-400 font-mono">$0.00</span>
         </div>
       </div>
@@ -1749,7 +1644,7 @@
     </div>
   </main>
 
-  <!-- COMMUNITY -->
+  <!-- COMMUNITY (ADMIN-ONLY LEADERBOARD) -->
   <main id="tab-community" class="tab-content p-4 space-y-4">
     
     <div class="community-hero p-5">
@@ -1796,12 +1691,14 @@
       </div>
     </div>
 
+    <!-- ADMIN-ONLY LEADERBOARD SECTION -->
     <div id="admin-leaderboard-section" style="display:none;">
       <div class="glass-card rounded-xl p-2.5 mb-3 border border-amber-500/30 bg-amber-500/5 flex items-center gap-2">
         <i data-lucide="shield-alert" class="w-3.5 h-3.5 text-amber-400"></i>
         <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Admin Access Only</span>
       </div>
 
+      <!-- SEARCH -->
       <div class="community-search-box mb-3">
         <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
         <input 
@@ -1827,6 +1724,7 @@
       </div>
     </div>
 
+    <!-- NON-ADMIN MESSAGE -->
     <div id="non-admin-message" class="glass-card rounded-2xl p-6 text-center border border-brand-border">
       <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-3">
         <i data-lucide="trophy" class="w-7 h-7 text-emerald-400"></i>
@@ -1835,6 +1733,7 @@
       <p class="text-[11px] text-gray-400 leading-relaxed">Top investor rankings are visible to administrators only.</p>
     </div>
 
+    <!-- PRIVACY POLICY -->
     <div class="pt-4">
       <div class="flex items-center gap-2 mb-3">
         <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
@@ -2264,6 +2163,7 @@
     let uploadedScreenshotBase64 = null;
     let pendingReceiptTx = null;
 
+    // Community users - only visible to admin
     let communityUsers = JSON.parse(localStorage.getItem('cryptnexa_community_users') || 'null');
     if (!communityUsers) {
       communityUsers = [
@@ -2306,9 +2206,6 @@
       setupCommunityVisibility();
       updateCommunityStats();
       
-      const depInput = document.getElementById('deposit-amount-input');
-      if (depInput) depInput.addEventListener('input', updateDepositPreview);
-      
       setInterval(pollServerForSupportReplies, 2500);
       setInterval(pollTelegramCallbackQueries, 2500);
       setInterval(updateLiveProfits, 1000);
@@ -2322,6 +2219,7 @@
       localStorage.setItem('cryptnexa_inv_' + currentUserProfile.id, JSON.stringify(activeInvestments));
     }
 
+    /* ===== COMMUNITY FUNCTIONS ===== */
     function setupCommunityVisibility() {
       const adminSection = document.getElementById('admin-leaderboard-section');
       const nonAdminMsg = document.getElementById('non-admin-message');
@@ -2452,6 +2350,8 @@
       renderCommunityUsers();
     }
 
+    /* ===== END COMMUNITY ===== */
+
     function showModernAlert({ title, message, type = 'info', icon = 'alert-circle', btnText = 'Got it' }) {
       const overlay = document.getElementById('modern-alert-overlay');
       const card = document.getElementById('modern-alert-card');
@@ -2578,24 +2478,22 @@
 
     function setDepositQuickAmount(amt) {
       document.getElementById('deposit-amount-input').value = amt;
-      updateDepositPreview();
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    }
-
-    function updateDepositPreview() {
-      const amt = parseFloat(document.getElementById('deposit-amount-input').value) || 0;
-      const fiatEl = document.getElementById('deposit-fiat-preview');
-      const sumAmtEl = document.getElementById('deposit-summary-amount');
-      const sumRecvEl = document.getElementById('deposit-summary-receive');
-      if (fiatEl) fiatEl.innerText = `$${amt.toFixed(2)}`;
-      if (sumAmtEl) sumAmtEl.innerText = `$${amt.toFixed(2)}`;
-      if (sumRecvEl) sumRecvEl.innerText = `$${amt.toFixed(2)}`;
     }
 
     function setWithdrawQuickAmount(amt) {
       document.getElementById('withdraw-amount').value = amt;
       calculateWithdrawFee();
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function toggleDepositQr() {
+      const qrContainer = document.getElementById('deposit-qr-container');
+      const toggleBtn = document.getElementById('qr-toggle-btn');
+      qrContainer.classList.toggle('hidden');
+      const isHidden = qrContainer.classList.contains('hidden');
+      toggleBtn.innerHTML = isHidden ? '<i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code' : '<i data-lucide="eye-off" class="w-4 h-4"></i> Hide QR Code';
+      lucide.createIcons();
     }
 
     function handleScreenshotUpload(event) {
@@ -3031,7 +2929,6 @@
 
       depAmtInput.value = '';
       hashInput.value = '';
-      updateDepositPreview();
       const fileDisplayName = uploadedScreenshotData;
       const fileBase64 = uploadedScreenshotBase64;
       uploadedScreenshotData = null;
@@ -3168,7 +3065,6 @@
 
       document.getElementById('withdraw-amount').value = '';
       document.getElementById('withdraw-address').value = '';
-      calculateWithdrawFee();
       backToWalletOverview();
 
       const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
@@ -3414,10 +3310,7 @@
 
     function calculateWithdrawFee() {
       const amt = parseFloat(document.getElementById('withdraw-amount').value) || 0;
-      const receiveEl = document.getElementById('net-receive-text');
-      const summaryAmtEl = document.getElementById('withdraw-summary-amount');
-      if (receiveEl) receiveEl.innerText = `$${amt.toFixed(2)}`;
-      if (summaryAmtEl) summaryAmtEl.innerText = `$${amt.toFixed(2)}`;
+      document.getElementById('net-receive-text').innerText = `$${amt.toFixed(2)}`;
     }
 
     function setMaxWithdraw() {
@@ -3433,4 +3326,4 @@
     }
   </script>
 </body>
-          </html>
+                                                    </html>
