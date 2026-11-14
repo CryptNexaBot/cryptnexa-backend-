@@ -1242,56 +1242,42 @@
       border-radius: 12px;
       padding: 12px 14px;
       display: flex;
-      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 10px;
     }
 
+    /* Updated: address text white, monospace, centered */
     .address-mono-text {
       font-family: 'JetBrains Mono', monospace;
       font-size: 14px;
       font-weight: 800;
-      color: #10b981;
+      color: #ffffff;
       letter-spacing: 0.05em;
-      text-shadow: 0 0 20px rgba(16, 185, 129, 0.5);
+      flex: 1;
+      text-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
       word-break: break-all;
       line-height: 1.4;
       text-align: center;
     }
 
-    .address-network-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      font-size: 9px;
-      font-weight: 800;
-      color: #ffffff;
-      background: rgba(0, 0, 0, 0.4);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      padding: 3px 10px;
-      border-radius: 999px;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
     .btn-copy-cinematic {
-      width: 100%;
-      padding: 10px 16px;
-      border-radius: 10px;
+      padding: 8px 14px;
+      border-radius: 9px;
       background: linear-gradient(135deg, #10b981, #06b6d4);
       color: #000;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 900;
       letter-spacing: 0.05em;
       display: flex;
       align-items: center;
-      justify-content: center;
       gap: 5px;
       box-shadow: 0 4px 16px -4px rgba(16, 185, 129, 0.5);
       border: none;
       cursor: pointer;
+      white-space: nowrap;
       text-transform: uppercase;
+      flex-shrink: 0;
     }
 
     .btn-copy-cinematic:active { transform: scale(0.95); }
@@ -2232,7 +2218,7 @@
         </div>
       </div>
 
-      <!-- STEP 1: Network Selection (Compact & Professional) -->
+      <!-- STEP 1: Network Selection -->
       <div class="deposit-flow-step active" id="dep-step-1">
         <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
           <div class="deposit-step-header">
@@ -2368,7 +2354,7 @@
             </div>
           </div>
 
-          <!-- Address Card - Compact Premium -->
+          <!-- Address Card - Compact Premium (updated: smaller font, white text, centered) -->
           <div class="cinematic-address-card">
             <div class="address-label-row">
               <div class="address-label-left">
@@ -2379,12 +2365,8 @@
                 <i data-lucide="shield-check" class="w-3 h-3"></i>
               </div>
             </div>
-            <div class="address-value-box">
-              <span class="address-network-chip" id="address-network-chip-display">USDT (TRC20)</span>
-              <span class="address-mono-text" id="address-compact-display">—</span>
-              <button onclick="copyToClipboard('wallet-address-text')" class="btn-copy-cinematic">
-                <i data-lucide="copy" class="w-3 h-3"></i> Copy Address
-              </button>
+            <div class="address-value-box" style="justify-content: center;">
+              <span class="address-mono-text" id="address-compact-display" style="font-size: 12px; text-align: center; color: #ffffff;">—</span>
             </div>
             <input type="text" id="wallet-address-text" readonly class="hidden">
           </div>
@@ -2469,15 +2451,15 @@
         </div>
       </div>
 
-      <!-- STEP 5: Success -->
+      <!-- STEP 5: Success (Text updated: removed "admin review", professional) -->
       <div class="deposit-flow-step" id="dep-step-5">
         <div class="deposit-success-card-cinematic">
           <div class="deposit-success-icon-cinematic">
             <svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <h4 class="deposit-success-title-cinematic">Deposit Submitted!</h4>
+          <h4 class="deposit-success-title-cinematic">Deposit Received</h4>
           <p class="deposit-success-text-cinematic">
-            Your deposit request has been received and is pending admin review. You'll receive a notification once it's verified.
+            Your deposit has been successfully submitted and is being processed. You will be notified once it's confirmed.
           </p>
           <div class="deposit-success-ref-cinematic">
             <i data-lucide="hash" class="w-3.5 h-3.5"></i>
@@ -2995,7 +2977,7 @@
     </button>
   </main>
 
-  <!-- NEW BOTTOM NAV -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav-new">
     <button onclick="switchTab('dashboard')" id="nav-dashboard" class="bottom-nav-item active">
       <div class="bottom-nav-icon-wrap"><i data-lucide="layout-dashboard"></i></div>
@@ -3264,13 +3246,11 @@
       }
     }
 
-    // Format address as compact (first 4 chars + ****** + last 5 chars)
     function formatCompactAddress(addr) {
       if (!addr || addr.length < 20) return addr;
       return addr.substring(0, 4) + '******' + addr.substring(addr.length - 5);
     }
 
-    /* ===== GENERATE ADDRESS WITH LOADING ===== */
     function generateDepositAddress() {
       const amount = parseFloat(document.getElementById('deposit-amount-input').value);
       
@@ -3295,34 +3275,25 @@
       depositFlowState.generatedAt = now;
       depositFlowState.expiresAt = new Date(now.getTime() + DEPOSIT_EXPIRY_MINUTES * 60 * 1000);
       
-      // Show generating overlay
       const generatingOverlay = document.getElementById('generating-overlay');
       generatingOverlay.classList.add('show');
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
       
-      // Simulate processing delay (2 seconds)
       setTimeout(() => {
         generatingOverlay.classList.remove('show');
         
-        // Update UI with generated data
         document.getElementById('payment-amount-display').innerText = amount.toFixed(2);
         document.getElementById('payment-network-display').innerText = networkData.name;
         document.getElementById('wallet-address-text').value = networkData.address;
         
-        // Set network chip display (white text)
-        document.getElementById('address-network-chip-display').innerText = networkData.name;
-        
-        // Set COMPACT address display (4 chars + ****** + 5 chars)
         document.getElementById('address-compact-display').innerText = formatCompactAddress(networkData.address);
         
         const expiryStr = depositFlowState.expiresAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
         document.getElementById('payment-expiry-display').innerText = expiryStr;
         
-        // QR image (will be shown when toggled)
         document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(networkData.address)}&color=080b11&bgcolor=ffffff`;
         document.getElementById('warning-net-name').innerText = networkData.name;
         
-        // Reset QR toggle to hidden
         const qrContainer = document.getElementById('qr-code-container');
         if (qrContainer) qrContainer.classList.remove('show');
         const qrBtn = document.getElementById('qr-toggle-btn');
@@ -3338,7 +3309,6 @@
       }, 2000);
     }
 
-    /* ===== QR TOGGLE ===== */
     function toggleQrCode() {
       const qrContainer = document.getElementById('qr-code-container');
       const qrBtn = document.getElementById('qr-toggle-btn');
