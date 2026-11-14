@@ -1149,9 +1149,7 @@
         </div>
       </div>
 
-      <!-- STEP 3: Payment (Address + Timer) - LOOMA BAAHNNA HADDA -->
-      <!-- STEP 4: Confirm Payment - LOOMA BAAHNNA HADDA -->
-      <!-- STEP 5: Success - LOOMA BAAHNNA HADDA -->
+      <!-- STEP 3, 4, 5 waa la tirtiray maadaama PayerURL uu isagu maareynayo lacag bixinta -->
 
     </div>
 
@@ -1866,7 +1864,33 @@
       localStorage.setItem('cryptnexa_community_users', JSON.stringify(communityUsers));
     }
 
+    // ==========================================
+    // 1. CUSUB: AUTHENTICATE USER (SOO QAADO TOKEN-KA)
+    // ==========================================
+    async function authenticateUser() {
+      try {
+        const initData = tg?.initData || "demo"; 
+        
+        const response = await fetch('https://cryptnexa-backend.onrender.com/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ initData: initData })
+        });
+
+        const data = await response.json();
+        
+        if (data.token) {
+          localStorage.setItem('jwt_token', data.token);
+          console.log("Token kaydsan yahay!");
+        }
+      } catch (error) {
+        console.error("Login Error:", error);
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      authenticateUser(); // Ku dar tan si token-ka loo soo qaato
+      
       updateWalletUI();
       renderHistory();
       renderSupportTickets();
@@ -1887,7 +1911,9 @@
       localStorage.setItem('cryptnexa_inv_' + currentUserProfile.id, JSON.stringify(activeInvestments));
     }
 
-    /* ===== CUSUB: PAYERURL INTEGRATION ===== */
+    // ==========================================
+    // 2. CUSUB: PAYERURL DEPOSIT
+    // ==========================================
     async function initiatePayerUrlDeposit() {
       const amount = parseFloat(document.getElementById('deposit-amount-input').value);
       
@@ -1902,9 +1928,13 @@
         return;
       }
 
-      // Soo qaado Token-ka (JWT) ee user-ka (haddii uu login sameeyay)
-      const token = localStorage.getItem('jwt_token'); 
-      
+      const token = localStorage.getItem('jwt_token');
+
+      if (!token) {
+        showModernAlert({ title: 'Authentication Error', message: 'Please close and reopen the app to login.', type: 'error', icon: 'lock' });
+        return;
+      }
+
       const generatingOverlay = document.getElementById('generating-overlay');
       generatingOverlay.classList.add('show');
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
@@ -1922,7 +1952,6 @@
         const data = await response.json();
 
         if (data.success && data.checkout_url) {
-          // U beddel user-ka bogga lacag bixinta PayerURL
           window.location.href = data.checkout_url;
         } else {
           generatingOverlay.classList.remove('show');
@@ -1975,8 +2004,6 @@
         }
       }
     }
-
-    // Functions-ka kale ee hore (generateDepositAddress, submitDepositRequest, iwm) waa la hayaa si aad u tijaabiso manual deposit haddii loo baahdo, laakiin badhanka hadda wuxuu isticmaalaa PayerURL.
 
     /* ===== COMMUNITY FUNCTIONS ===== */
     function setupCommunityVisibility() {
@@ -2299,8 +2326,148 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Qaybta kale ee hore ayaa halkan ka sii socota (renderHistory, initiateWithdrawalProcess, iwm)
-    // Waan ku daray function-yada muhiimka ah ee aan hore u qorin si code-ku u shaqeeyo.
+    function startSimpleProcessing(amount, txId, isWithdrawal) {
+      const overlay = document.getElementById('simple-processing-overlay');
+      const spinner = document.getElementById('processing-spinner');
+      const checkmark = document.getElementById('processing-checkmark');
+      const titleText = document.getElementById('processing-title-text');
+      const subtitleText = document.getElementById('processing-subtitle-text');
+      const amountText = document.getElementById('processing-amount-text');
+
+      amountText.innerText = amount;
+      titleText.innerText = isWithdrawal ? 'Processing Withdrawal...' : 'Processing Deposit...';
+      subtitleText.innerText = isWithdrawal ? 'Please wait while we process your withdrawal.' : 'Please wait while we process your deposit.';
+      spinner.style.display = 'block';
+      checkmark.style.display = 'none';
+      overlay.classList.add('show');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+      setTimeout(() => {
+        spinner.style.display = 'none';
+        checkmark.style.display = 'flex';
+        titleText.innerText = 'Transaction Submitted';
+        subtitleText.innerText = 'Your transaction has been submitted successfully.';
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      }, 1500);
+
+      setTimeout(() => {
+        overlay.classList.remove('show');
+        pendingReceiptTx = txId;
+        setTimeout(() => { openReceiptModal(txId); }, 250);
+      }, 2500);
+    }
+
+    function generateProReceiptHTML(tx) {
+      const isDeposit = tx.type === 'deposit';
+      const isWithdrawal = tx.type === 'withdraw';
+      const isInvestment = tx.type === 'investment';
+
+      let statusIconSvg = '';
+      let statusClass = 'pending';
+      let statusBadgeClass = 'pending';
+      let amountClass = 'positive';
+      let amountPrefix = '+';
+
+      if (tx.status === 'Completed') {
+        statusClass = 'success';
+        statusBadgeClass = 'completed';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+      } else if (tx.status === 'Pending Review') {
+        statusClass = 'pending';
+        statusBadgeClass = 'pending';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>`;
+      } else if (tx.status === 'Rejected') {
+        statusClass = 'failed';
+        statusBadgeClass = 'failed';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M6 6l12 12M18 6L6 18" stroke-linecap="round"/></svg>`;
+      } else if (tx.status === 'Active') {
+        statusClass = 'pending';
+        statusBadgeClass = 'active';
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2" stroke-linecap="round"/></svg>`;
+      } else {
+        statusIconSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M5 13l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        statusClass = 'success';
+        statusBadgeClass = 'completed';
+      }
+
+      if (isWithdrawal) { amountClass = 'negative'; amountPrefix = '-'; }
+      else if (isInvestment) { amountClass = 'neutral'; amountPrefix = '-'; }
+      if (tx.status === 'Rejected' && isDeposit) { amountClass = 'negative'; amountPrefix = ''; }
+
+      let networkName = tx.network || 'USDT (TRC20)';
+      let networkKey = tx.networkKey || 'usdt_trc20';
+      let networkLogo = cryptoWallets[networkKey]?.logo || 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040';
+      let rawAmount = tx.rawAmount || parseFloat((tx.amount || '0').replace(/[^0-9.]/g, '')) || 0;
+      const receiptDate = tx.fullDate || new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const fullAddress = tx.fullAddress || tx.ref || 'N/A';
+      const txIdDisplay = tx.fullId || tx.id.toUpperCase();
+
+      return `
+        <div class="pro-receipt">
+          <button class="pro-receipt-close" onclick="closeModal('receipt-modal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg>
+          </button>
+          <div class="pro-receipt-header">
+            <div class="pro-receipt-status-icon ${statusClass}">${statusIconSvg}</div>
+            <div class="pro-receipt-amount ${amountClass}">${amountPrefix}$${rawAmount.toFixed(2)}</div>
+            <div class="pro-receipt-type-label">${isDeposit ? 'Deposit Amount' : isWithdrawal ? 'Withdrawal Amount' : 'Investment Amount'}</div>
+            <div class="pro-receipt-status-badge ${statusBadgeClass}">${tx.status === 'Pending Review' ? 'Pending Review' : tx.status}</div>
+          </div>
+          <div class="pro-receipt-body">
+            <div class="pro-receipt-network-box">
+              <div class="pro-receipt-network-logo">
+                <img src="${networkLogo}" alt="${networkName}" onerror="this.style.display='none'">
+              </div>
+              <span class="pro-receipt-network-name">${networkName}</span>
+            </div>
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Date</span>
+              <span class="pro-receipt-row-value" style="font-size:10px;">${receiptDate}</span>
+            </div>
+            ${isWithdrawal ? `
+              <div class="pro-receipt-address-box">
+                <div class="pro-receipt-address-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M12 12h.01M8 12h.01M16 12h.01" stroke-linecap="round"/></svg>DESTINATION WALLET</div>
+                <div class="pro-receipt-address-value">${fullAddress}</div>
+              </div>
+            ` : isDeposit ? `
+              <div class="pro-receipt-txid-box">
+                <div class="pro-receipt-txid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg>TRANSACTION ID</div>
+                <div class="pro-receipt-txid-value">${fullAddress}</div>
+              </div>
+            ` : `
+              <div class="pro-receipt-txid-box">
+                <div class="pro-receipt-txid-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg>REFERENCE ID</div>
+                <div class="pro-receipt-txid-value">${txIdDisplay}</div>
+              </div>
+            `}
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Status</span>
+              <span class="pro-receipt-row-value" style="color:${statusBadgeClass === 'completed' ? '#10b981' : statusBadgeClass === 'failed' ? '#ef4444' : statusBadgeClass === 'active' ? '#06b6d4' : '#f59e0b'}; text-transform:uppercase; font-size:10px;">${tx.status}</span>
+            </div>
+            <div class="pro-receipt-row">
+              <span class="pro-receipt-row-label">Reference</span>
+              <span class="pro-receipt-row-value" style="font-size:9px;">CRX-${Date.now().toString().slice(-8)}</span>
+            </div>
+          </div>
+          <div class="pro-receipt-footer">
+            <div class="pro-receipt-footer-text">CRYPTNEXA · SECURE RECEIPT</div>
+            <div class="pro-receipt-footer-brand">Institutional Crypto Yield</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function openReceiptModal(txId) {
+      const tx = transactionsHistory.find(t => t.id === txId);
+      if (!tx) {
+        showModernAlert({ title: 'Not Found', message: 'Receipt not available', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      document.getElementById('receipt-content-container').innerHTML = generateProReceiptHTML(tx);
+      document.getElementById('receipt-modal').classList.remove('hidden');
+      lucide.createIcons();
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    }
 
     function renderHistory() {
       const container = document.getElementById('history-container');
@@ -2331,6 +2498,7 @@
         let networkLogo = '';
         let networkKey = tx.networkKey || 'usdt_trc20';
 
+        // Determine network logo
         if (tx.type === 'deposit' || tx.type === 'withdraw') {
           networkLogo = cryptoWallets[networkKey]?.logo || 'https://cryptologos.cc/logos/tether-usdt-logo.png?v=040';
         }
@@ -2347,6 +2515,7 @@
           iconHTML = '<i data-lucide="zap" class="w-5 h-5"></i>';
         }
 
+        // For deposit/withdraw, use network logo. For investment, use zap icon
         if (tx.type === 'deposit' || tx.type === 'withdraw') {
           iconHTML = `<img src="${networkLogo}" alt="${tx.network || 'USDT'}" onerror="this.style.display='none'">`;
         }
@@ -2397,31 +2566,506 @@
       lucide.createIcons();
     }
 
-    function openReceiptModal(txId) {
-      const tx = transactionsHistory.find(t => t.id === txId);
-      if (!tx) return;
-      // (Function-kan wuxuu isticmaalaa generateProReceiptHTML oo aan halkan ku soo koobay)
-      document.getElementById('receipt-content-container').innerHTML = generateProReceiptHTML(tx);
-      document.getElementById('receipt-modal').classList.remove('hidden');
+    function renderActiveInvestments() {
+      const container = document.getElementById('active-investments-container');
+      if (!container) return;
+      if (activeInvestments.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-xl p-4 text-center text-xs text-gray-400 border border-brand-border">No active investments.</div>`;
+        return;
+      }
+      container.innerHTML = '';
+      activeInvestments.forEach(inv => {
+        const elapsed = Date.now() - inv.startTime;
+        const totalDuration = inv.endTime - inv.startTime;
+        const progress = Math.min((elapsed / totalDuration) * 100, 100);
+        const daysRemaining = Math.max(0, Math.ceil((inv.endTime - Date.now()) / (1000 * 60 * 60 * 24)));
+        const currentProfit = inv.currentProfit || 0;
+        const totalExpected = inv.rawAmount * (1 + (inv.rate * inv.days / 100));
+        
+        container.innerHTML += `
+          <div class="glass-card rounded-xl p-4 border-l-4 border-l-emerald-500 space-y-3">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-white text-sm">${inv.title}</h4>
+                <p class="text-xs text-gray-400 mt-0.5">Invested: <span class="text-white font-semibold">$${inv.rawAmount.toFixed(2)}</span></p>
+              </div>
+              <div class="text-right">
+                <span class="text-xs bg-emerald-500/10 text-emerald-400 font-bold px-2.5 py-1 rounded-full">Active</span>
+                <p class="text-[10px] text-cyan-400 mt-1 font-mono">${daysRemaining}d left</p>
+              </div>
+            </div>
+            <div class="bg-brand-bg rounded-lg p-2.5 space-y-1">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-gray-400">Live Profit:</span>
+                <span class="text-emerald-400 font-black font-mono">+$${currentProfit.toFixed(4)}</span>
+              </div>
+              <div class="flex justify-between text-[11px]">
+                <span class="text-gray-400">Expected Total:</span>
+                <span class="text-cyan-400 font-bold font-mono">$${totalExpected.toFixed(2)}</span>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs text-gray-400">
+                <span>Progress</span>
+                <span class="font-mono">${progress.toFixed(1)}%</span>
+              </div>
+              <div class="w-full bg-gray-800 rounded-full h-2 overflow-hidden">
+                <div class="bg-gradient-to-r from-emerald-500 to-cyan-500 h-2 rounded-full" style="width: ${progress}%"></div>
+              </div>
+            </div>
+          </div>`;
+      });
       lucide.createIcons();
     }
 
-    function generateProReceiptHTML(tx) {
-       // ... (code-kaagii hore ee receipt-ka)
-       return `<div class="pro-receipt"><p class="text-center p-4">Receipt for ${tx.id}</p><button class="pro-receipt-close" onclick="closeModal('receipt-modal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12" stroke-linecap="round"/></svg></button></div>`;
+    function renderSupportTickets() {
+      const container = document.getElementById('support-tickets-history');
+      container.innerHTML = '';
+      if (supportTickets.length === 0) {
+        container.innerHTML = `<div class="glass-card rounded-xl p-3 text-center text-xs text-gray-400 border border-brand-border">No tickets yet.</div>`;
+        return;
+      }
+      supportTickets.forEach(ticket => {
+        container.innerHTML += `
+          <div class="glass-card rounded-xl p-4 border border-brand-border space-y-2.5" id="ticket-card-${ticket.id}">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-white">${ticket.id} • ${ticket.category}</span>
+              <span class="text-[10px] ${ticket.status === 'Resolved' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-400'} font-bold px-2 py-0.5 rounded">${ticket.status}</span>
+            </div>
+            <p class="text-xs text-gray-300 bg-brand-bg p-2.5 rounded-lg border border-brand-border">"${ticket.message}"</p>
+            ${ticket.reply ? `
+              <div class="p-2.5 bg-emerald-500/5 rounded-lg border border-emerald-500/20 text-[11px] space-y-1">
+                <div class="flex items-center gap-1.5 text-emerald-400 font-bold">
+                  <i data-lucide="bot" class="w-3.5 h-3.5"></i> Support Reply:
+                </div>
+                <p class="text-gray-200">${ticket.reply}</p>
+              </div>
+            ` : `<p class="text-[10px] text-cyan-400 italic">Awaiting reply...</p>`}
+          </div>`;
+      });
+      lucide.createIcons();
+    }
+
+    let currentPlan = {};
+    function openInvestModal(title, rate, days, min, max) {
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+      currentPlan = { title, rate, days, min, max };
+      document.getElementById('modal-plan-title').innerText = title;
+      document.getElementById('modal-daily-rate').innerText = `${rate}%`;
+      document.getElementById('modal-limits-text').innerHTML = `Range: <strong class="text-white">$${min} - $${max.toLocaleString()}</strong>`;
+      document.getElementById('modal-amount-input').value = min;
+      calculateModalProfit();
+      document.getElementById('invest-modal').classList.remove('hidden');
     }
 
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function calculateModalProfit() {
+      const amt = parseFloat(document.getElementById('modal-amount-input').value) || 0;
+      const dailyProfit = (amt * currentPlan.rate) / 100;
+      const netProfit = (amt * currentPlan.rate * currentPlan.days) / 100;
+      const totalPayout = amt + netProfit;
+      document.getElementById('modal-daily-profit').innerText = `$${dailyProfit.toFixed(2)}`;
+      document.getElementById('modal-net-profit').innerText = `$${netProfit.toFixed(2)}`;
+      document.getElementById('modal-total-payout').innerText = `$${totalPayout.toFixed(2)}`;
+    }
+
+    function confirmInvestment() {
+      const amt = parseFloat(document.getElementById('modal-amount-input').value);
+      if (isNaN(amt) || amt < currentPlan.min || amt > currentPlan.max) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Invalid Amount', message: `Please enter an amount between $${currentPlan.min} and $${currentPlan.max.toLocaleString()}.`, type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      if (amt > userPortfolio.balance) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Insufficient Balance', message: `Your available balance is $${userPortfolio.balance.toFixed(2)}.`, type: 'error', icon: 'wallet' });
+        return;
+      }
+
+      const now = Date.now();
+      const endTime = now + (currentPlan.days * 24 * 60 * 60 * 1000);
+      userPortfolio.balance -= amt;
+      userPortfolio.lockedBalance += amt;
+      updateWalletUI();
+
+      activeInvestments.unshift({ title: currentPlan.title, rawAmount: amt, rate: currentPlan.rate, days: currentPlan.days, startTime: now, endTime: endTime, currentProfit: 0, progress: 0 });
+      saveAppData();
+      renderActiveInvestments();
+
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const invId = 'inv_' + Date.now();
+      const newTx = { id: invId, type: 'investment', title: currentPlan.title, network: `${currentPlan.days}-Day Lock`, ref: 'Plan Allocation', rawAmount: amt, amount: `-$${amt.toFixed(2)}`, status: 'Active', color: 'cyan', icon: 'zap', time: nowStr, fullDate: nowStr, fullId: invId.toUpperCase() };
+      transactionsHistory.unshift(newTx);
+      saveAppData();
+      renderHistory();
+      closeModal('invest-modal');
+
+      triggerAdminBotNotification(`🚀 *NEW INVESTMENT*\n\n👤 User: \`${currentUserProfile.id}\`\n💰 Amount: *-$${amt.toFixed(2)}*\n📦 Plan: *${currentPlan.title}*`);
+      showModernAlert({ title: 'Investment Started!', message: `$${amt.toFixed(2)} has been deployed into ${currentPlan.title}.`, type: 'success', icon: 'check-circle', btnText: 'View Dashboard' });
+    }
+
+    async function sendDepositToAdminBot(tx) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+
+      const uniqueTag = `#DEP${Date.now().toString().slice(-6)}`;
+
+      let caption = `🚨 *NEW DEPOSIT REQUEST* ${uniqueTag}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `👤 *Name:* ${tx.userFullName}\n`;
+      caption += `🔗 *Username:* ${tx.userUsername}\n`;
+      caption += `🆔 *Telegram ID:* \`${tx.userTelegramId}\`\n`;
+      caption += `📌 *TX Reference:* \`${tx.id}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `💰 *Amount:* +$${tx.rawAmount.toFixed(2)} USDT\n`;
+      caption += `🌐 *Network:* ${tx.network}\n`;
+      caption += `📥 *Deposit Address:*\n\`${tx.depositAddress}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+
+      if (tx.txHashFull) {
+        caption += `🔍 *Transaction ID (TxID):*\n\`${tx.txHashFull}\`\n`;
+        caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      }
+
+      caption += `⏰ *Date:* ${tx.fullDate}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `✅ *Process this request:*`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          { text: `✅ VERIFY ${uniqueTag}`, callback_data: `approve_${tx.id}` },
+          { text: `❌ DECLINE ${uniqueTag}`, callback_data: `reject_${tx.id}` }
+        ]]
+      };
+
+      if (tx.screenshotBase64) {
+        try {
+          const base64Data = tx.screenshotBase64.split(',')[1];
+          const byteCharacters = atob(base64Data);
+          const byteNumbers = new Array(byteCharacters.length);
+          for (let i = 0; i < byteCharacters.length; i++) {
+            byteNumbers[i] = byteCharacters.charCodeAt(i);
+          }
+          const byteArray = new Uint8Array(byteNumbers);
+          const blob = new Blob([byteArray], { type: 'image/jpeg' });
+          
+          const formData = new FormData();
+          formData.append('chat_id', ADMIN_CHAT_ID);
+          formData.append('photo', blob, tx.screenshotName || 'screenshot.jpg');
+          formData.append('caption', caption);
+          formData.append('parse_mode', 'Markdown');
+          formData.append('reply_markup', JSON.stringify(keyboard));
+          
+          await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`, { method: 'POST', body: formData });
+        } catch (err) {
+          console.log('Photo send error:', err);
+          await sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard);
+        }
+      } else {
+        await sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard);
+      }
+    }
+
+    async function sendTextToAdmin(BOT_TOKEN, ADMIN_CHAT_ID, caption, keyboard) {
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: caption, parse_mode: "Markdown", reply_markup: keyboard })
+        });
+      } catch (err) { console.log('Send error:', err); }
+    }
+
+    async function initiateWithdrawalProcess() {
+      const amt = parseFloat(document.getElementById('withdraw-amount').value);
+      const addr = document.getElementById('withdraw-address').value.trim();
+
+      if (!amt || amt < 5) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Minimum Withdrawal', message: 'The minimum withdrawal amount is $5.00.', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+      if (amt > userPortfolio.balance) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Insufficient Balance', message: `Your available balance is $${userPortfolio.balance.toFixed(2)}.`, type: 'error', icon: 'wallet' });
+        return;
+      }
+      if (!addr || addr.length < 10) {
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        showModernAlert({ title: 'Invalid Address', message: 'Please provide a valid wallet address.', type: 'warning', icon: 'wallet' });
+        return;
+      }
+
+      userPortfolio.balance -= amt;
+      updateWalletUI();
+      saveAppData();
+
+      const netNames = { usdt_trc20: 'USDT (TRC20)', usdt_bep20: 'USDT (BEP20)', usdt_erc20: 'USDT (ERC20)', ton: 'TON' };
+      const netName = netNames[selectedWithdrawNetworkKey];
+      const shortAddr = addr.length > 20 ? addr.substring(0, 6) + '...' + addr.substring(addr.length - 4) : addr;
+
+      document.getElementById('withdraw-amount').value = '';
+      document.getElementById('withdraw-address').value = '';
+      backToWalletOverview();
+
+      const txId = 'tx_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      
+      const txObj = {
+        id: txId, type: 'withdraw', title: 'Crypto Withdrawal', network: netName,
+        networkKey: selectedWithdrawNetworkKey,
+        ref: 'To: ' + shortAddr, rawAmount: amt, amount: `-$${amt.toFixed(2)}`,
+        status: 'Pending Review', color: 'cyan', icon: 'arrow-up-right',
+        time: nowStr, fullDate: nowStr, fullId: 'WDR-' + txId.toUpperCase().slice(-12),
+        fullAddress: addr, processed: false,
+        userFullName: currentUserProfile.name,
+        userUsername: currentUserProfile.username,
+        userTelegramId: currentUserProfile.id
+      };
+
+      transactionsHistory.unshift(txObj);
+      saveAppData();
+      renderHistory();
+
+      await sendWithdrawalToAdminBot(txObj);
+      startSimpleProcessing(`-$${amt.toFixed(2)}`, txId, true);
+    }
+
+    async function sendWithdrawalToAdminBot(tx) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+
+      const uniqueTag = `#WDR${Date.now().toString().slice(-6)}`;
+
+      let caption = `🚨 *NEW WITHDRAWAL REQUEST* ${uniqueTag}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `👤 *Name:* ${tx.userFullName}\n`;
+      caption += `🔗 *Username:* ${tx.userUsername}\n`;
+      caption += `🆔 *Telegram ID:* \`${tx.userTelegramId}\`\n`;
+      caption += `📌 *TX Reference:* \`${tx.id}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `💰 *Amount:* -$${tx.rawAmount.toFixed(2)} USDT\n`;
+      caption += `🌐 *Network:* ${tx.network}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `📤 *Destination Address:*\n\`${tx.fullAddress}\`\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `⏰ *Date:* ${tx.fullDate}\n`;
+      caption += `━━━━━━━━━━━━━━━━━━━━\n`;
+      caption += `✅ *Process this request:*`;
+
+      const keyboard = {
+        inline_keyboard: [[
+          { text: `✅ VERIFY ${uniqueTag}`, callback_data: `approve_${tx.id}` },
+          { text: `❌ DECLINE ${uniqueTag}`, callback_data: `reject_${tx.id}` }
+        ]]
+      };
+
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: caption, parse_mode: "Markdown", reply_markup: keyboard })
+        });
+      } catch (err) { console.log('Send error:', err); }
+    }
+
+    function triggerAdminBotNotification(textMessage) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: ADMIN_CHAT_ID, text: textMessage, parse_mode: "Markdown" })
+      }).catch(err => console.log('Telegram dispatch:', err));
+    }
+
+    async function sendUserBotNotification(userTgId, textMessage) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      try {
+        await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: userTgId, text: textMessage, parse_mode: "Markdown" })
+        });
+      } catch (err) { console.log('User notification error:', err); }
+    }
+
+    function simulateSystemResponse(txId, action) {
+      const targetTx = transactionsHistory.find(t => t.id === txId);
+      if (!targetTx) {
+        showModernAlert({ title: 'Not Found', message: 'Transaction not found.', type: 'error', icon: 'alert-circle' });
+        return;
+      }
+      if (targetTx.processed || targetTx.status !== 'Pending Review') {
+        showModernAlert({ title: 'Already Processed', message: 'This transaction has already been reviewed.', type: 'info', icon: 'shield-check' });
+        return;
+      }
+
+      targetTx.processed = true;
+      targetTx.processedAt = new Date().toISOString();
+
+      const txAmount = targetTx.rawAmount || 0;
+      const txTypeLabel = targetTx.type === 'deposit' ? 'Deposit' : 'Withdrawal';
+      const userTgId = targetTx.userTelegramId;
+
+      if (action === 'approve') {
+        targetTx.status = 'Completed';
+        if (targetTx.type === 'deposit') {
+          userPortfolio.balance += txAmount;
+          userPortfolio.totalDeposited += txAmount;
+        } else if (targetTx.type === 'withdraw') {
+          userPortfolio.totalWithdrawn += txAmount;
+        }
+        updateWalletUI();
+        triggerAdminBotNotification(`✅ *VERIFIED*\n\nUser: \`${userTgId}\`\nAmount: *${targetTx.amount}*`);
+
+        if (userTgId) {
+          const shortMsg = 
+`✅ *Your ${txTypeLabel.toLowerCase()} has been completed successfully.*
+💰 $${txAmount.toFixed(2)} USDT · ${targetTx.network}`;
+          sendUserBotNotification(userTgId, shortMsg);
+        }
+
+        showModernAlert({ 
+          title: 'Transaction Completed', 
+          message: `${txTypeLabel} of $${txAmount.toFixed(2)} has been successfully completed. User has been notified.`, 
+          type: 'success', 
+          icon: 'check-circle' 
+        });
+      } else {
+        targetTx.status = 'Rejected';
+        if (targetTx.type === 'withdraw') {
+          userPortfolio.balance += txAmount;
+          updateWalletUI();
+        }
+        triggerAdminBotNotification(`❌ *DECLINED*\n\nUser: \`${userTgId}\`\nAmount: *${targetTx.amount}*`);
+
+        if (userTgId) {
+          const shortMsg = 
+`❌ *Your ${txTypeLabel.toLowerCase()} request has been declined.*
+💰 $${txAmount.toFixed(2)} USDT · Contact support for details`;
+          sendUserBotNotification(userTgId, shortMsg);
+        }
+
+        showModernAlert({ 
+          title: 'Transaction Declined', 
+          message: `${txTypeLabel} of $${txAmount.toFixed(2)} has been declined. User has been notified.`, 
+          type: 'error', 
+          icon: 'x-circle' 
+        });
+      }
+
+      saveAppData();
+      renderHistory();
+      if (!document.getElementById('receipt-modal').classList.contains('hidden')) {
+        openReceiptModal(txId);
+      }
+    }
+
     function hideAdminNotify() { document.getElementById('admin-notify-popup').classList.remove('show-popup'); }
+    function scrollToTicketForm() { document.getElementById('support-ticket-box').scrollIntoView({ behavior: 'smooth' }); }
+
+    function submitSupportTicket() {
+      const category = document.getElementById('support-category').value;
+      const message = document.getElementById('support-message').value.trim();
+
+      if (!message || message.length < 5) {
+        showModernAlert({ title: 'Message Too Short', message: 'Please provide a detailed description (at least 5 characters).', type: 'warning', icon: 'alert-circle' });
+        return;
+      }
+
+      const nowStr = new Date().toLocaleString('en-US', { month: 'short', day: 'numeric' });
+      const ticketId = 'tkt_' + Math.floor(1000 + Math.random() * 9000);
+      const ticketBadge = '#84' + Math.floor(10 + Math.random() * 90);
+      
+      supportTickets.unshift({ id: ticketBadge, rawId: ticketId, category, message, date: nowStr, status: 'Pending', reply: null });
+      saveAppData();
+      renderSupportTickets();
+      document.getElementById('support-message').value = '';
+
+      triggerAdminBotNotificationWithSupportKeyboard(
+        `🎫 *SUPPORT TICKET ${ticketBadge}*\n\n👤 ${currentUserProfile.name} (\`${currentUserProfile.username}\`)\n🆔 \`${currentUserProfile.id}\`\n📂 *${category}*\n💬 _${message}_`, 
+        ticketId
+      );
+      showModernAlert({ title: 'Ticket Submitted', message: `Your support ticket ${ticketBadge} has been received.`, type: 'success', icon: 'headphones' });
+    }
+
+    function triggerAdminBotNotificationWithSupportKeyboard(textMessage, ticketId) {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+      const ADMIN_CHAT_ID = "7076265514";
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: ADMIN_CHAT_ID, text: textMessage, parse_mode: "Markdown",
+          reply_markup: { inline_keyboard: [[{ text: "💬 Reply to User", callback_data: `reply_tkt_${ticketId}` }]] }
+        })
+      }).catch(err => console.log('Telegram dispatch:', err));
+    }
+
+    let lastUpdateId = parseInt(localStorage.getItem('cryptnexa_last_update_id') || '0');
+    function pollTelegramCallbackQueries() {
+      const BOT_TOKEN = "9047928965:AAFwgZzenhoygduvmfxCx-FTpoqpq0c2IF8";
+
+      fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=${lastUpdateId + 1}&timeout=1`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.ok && data.result && data.result.length > 0) {
+            data.result.forEach(update => {
+              lastUpdateId = Math.max(lastUpdateId, update.update_id);
+              localStorage.setItem('cryptnexa_last_update_id', lastUpdateId.toString());
+
+              if (update.callback_query) {
+                const query = update.callback_query;
+                const dataStr = query.data;
+                fetch(`https://api.telegram.org/bot${BOT_TOKEN}/answerCallbackQuery`, {
+                  method: 'POST', headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ callback_query_id: query.id, text: "Processing..." })
+                }).catch(() => {});
+
+                if (dataStr.startsWith('approve_') || dataStr.startsWith('reject_')) {
+                  const action = dataStr.startsWith('approve_') ? 'approve' : 'reject';
+                  const txId = dataStr.replace('approve_', '').replace('reject_', '');
+                  simulateSystemResponse(txId, action);
+                }
+              }
+            });
+          }
+        })
+        .catch(err => console.log('Poll telegram:', err));
+    }
+
+    function pollServerForSupportReplies() {
+      const stored = localStorage.getItem('cryptnexa_support_' + currentUserProfile.id);
+      if (stored) {
+        try {
+          const parsed = JSON.parse(stored);
+          let updated = false;
+          parsed.forEach(st => {
+            const localMatch = supportTickets.find(lt => lt.id === st.id);
+            if (localMatch && !localMatch.reply && st.reply) {
+              localMatch.reply = st.reply;
+              localMatch.status = st.status;
+              updated = true;
+            }
+          });
+          if (updated) renderSupportTickets();
+        } catch (e) {}
+      }
+    }
+
+    function calculateWithdrawFee() {
+      const amt = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+      document.getElementById('net-receive-text').innerText = `$${amt.toFixed(2)}`;
+    }
+
+    function setMaxWithdraw() {
+      document.getElementById('withdraw-amount').value = userPortfolio.balance;
+      calculateWithdrawFee();
+    }
+
     function copyToClipboard(elementId) {
       const text = document.getElementById(elementId).value;
       navigator.clipboard.writeText(text);
       if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
-      showModernAlert({ title: 'Copied', message: 'Copied successfully.', type: 'success', icon: 'copy' });
+      showModernAlert({ title: 'Copied to Clipboard', message: 'The information has been successfully copied.', type: 'success', icon: 'copy' });
     }
-
-    // Functions-ka kale (Withdraw, Investment, Support) halkan ayay ku xiran yihiin code-kaagii hore.
-    // Waan ku soo koobay si code-ku u buuxsamo.
   </script>
 </body>
-  </html>
+    </html>
