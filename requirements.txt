@@ -1,9 +1,6 @@
-Flask
-Flask-Cors
-PyJWT
-Flask-Limiter
-pymongo
+payerurl
 python-dotenv
-requests
-gunicorn
+Flask-Cors
+Flask-Limiter
+PyJWT
 
