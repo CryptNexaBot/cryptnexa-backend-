@@ -911,6 +911,80 @@
     .verified-chip { display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 999px; background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3); letter-spacing: 0.03em; text-transform: uppercase; }
 
     @keyframes iconEnter { 0% { transform: scale(0.3) rotate(-30deg); opacity: 0; } 60% { transform: scale(1.08) rotate(4deg); } 100% { transform: scale(1) rotate(0deg); opacity: 1; } }
+
+    /* ===== NEW PROFESSIONAL DEPOSIT & WITHDRAW STYLES ===== */
+    .deposit-pro-container {
+      background: #0f141c;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .deposit-warning-box {
+      background: #2d1b1e;
+      border: 1px solid #4a2529;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .deposit-qr-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 0;
+      gap: 16px;
+    }
+
+    .deposit-qr-wrapper {
+      background: #ffffff;
+      padding: 12px;
+      border-radius: 16px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .deposit-qr-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    .deposit-address-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a202c;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 10px 14px;
+      width: 100%;
+    }
+
+    .deposit-address-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #e5e7eb;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
   </style>
 </head>
 <body class="font-sans antialiased pb-32">
@@ -1318,17 +1392,16 @@
       </div>
     </div>
 
-    <!-- DEPOSIT -->
+    <!-- PROFESSIONAL DEPOSIT SECTION -->
     <div id="section-deposit" class="space-y-4 hidden">
+      <!-- Header -->
       <div class="flex items-center justify-between">
-        <button onclick="backToWalletOverview()" class="text-xs text-emerald-400 flex items-center gap-1.5 font-bold bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-lg border border-emerald-500/20 transition-all">
-          <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i> Back
+        <button onclick="backToWalletOverview()" class="text-xs text-gray-300 flex items-center gap-1.5 font-bold hover:text-white transition-all">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
         </button>
-        <div class="flex items-center gap-1.5 verified-chip">
-          <i data-lucide="shield-check" class="w-3 h-3"></i> SECURE
-        </div>
       </div>
 
+      <!-- Bybit Tabs -->
       <div class="bybit-tabs">
         <div class="bybit-tab active deposit-tab" onclick="openWalletAction('deposit')">
           <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i> Deposit
@@ -1338,68 +1411,120 @@
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
-        <div class="flex items-center justify-between">
-          <span class="text-[10px] text-gray-400 uppercase font-bold">Select Network</span>
-          <span class="text-[10px] text-emerald-400 font-mono font-bold">USDT</span>
+      <!-- Main Professional Deposit Card -->
+      <div class="deposit-pro-container">
+        
+        <!-- From / To Row -->
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex-1 bg-[#1a202c] border border-white/10 rounded-xl p-2.5 flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+              <i data-lucide="wallet" class="w-3 h-3"></i>
+            </div>
+            <div class="overflow-hidden">
+              <span class="text-[9px] text-gray-500 block uppercase font-bold">From</span>
+              <span class="text-[11px] text-gray-300 font-mono font-bold truncate block" id="deposit-from-wallet">0x4EC42***0DD6C94</span>
+            </div>
+          </div>
+          <div class="flex-1 bg-[#1a202c] border border-white/10 rounded-xl p-2.5 flex items-center gap-2">
+            <div class="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0">
+              <i data-lucide="download" class="w-3 h-3"></i>
+            </div>
+            <div class="overflow-hidden">
+              <span class="text-[9px] text-gray-500 block uppercase font-bold">To</span>
+              <span class="text-[11px] text-gray-300 font-mono font-bold truncate block">CRYPTNEXA</span>
+            </div>
+          </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2">
-          <div onclick="selectCryptoMethod('usdt_trc20')" id="card-usdt_trc20" class="network-card active">
-            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
-            <div class="flex items-center gap-2.5">
-              <div class="network-logo-wrap network-logo-usdt" style="width:34px;height:34px;padding:5px;">
-                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="USDT" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#26A17B;font-weight:900;font-size:16px\'>₮</span>'">
-              </div>
-              <div class="min-w-0">
-                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
-                <p class="text-[9px] text-emerald-400 font-bold">TRC20</p>
-              </div>
+        <!-- Important Notice Box -->
+        <div class="deposit-warning-box">
+          <div class="shrink-0 mt-0.5">
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500"></i>
+          </div>
+          <div>
+            <h4 class="text-sm font-bold text-amber-500 mb-1">Important Notice</h4>
+            <p class="text-[11px] text-gray-300 leading-relaxed" id="notice-text-body">
+              Only send <strong class="text-white">Tether (USDT)</strong> via the <strong class="text-white">BNB Smart Chain (BEP20)</strong> network assets to this address, sending other assets will result a permanent loss.
+            </p>
+          </div>
+        </div>
+
+        <!-- QR Code Section -->
+        <div class="deposit-qr-box">
+          <div class="deposit-qr-wrapper">
+            <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=0xe4484af8794b0fe2eccf433f7da7ac81935fc4a0&color=000000&bgcolor=ffffff" alt="QR" class="w-44 h-44 rounded-md">
+            <div class="deposit-qr-icon">
+              <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" alt="Tether" class="w-6 h-6">
             </div>
           </div>
+        </div>
 
-          <div onclick="selectCryptoMethod('usdt_bep20')" id="card-usdt_bep20" class="network-card">
-            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
-            <div class="flex items-center gap-2.5">
-              <div class="network-logo-wrap network-logo-bnb" style="width:34px;height:34px;padding:5px;">
-                <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" alt="BEP20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#F3BA2F;font-weight:900;font-size:16px\'>⚡</span>'">
-              </div>
-              <div class="min-w-0">
-                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
-                <p class="text-[9px] text-amber-400 font-bold">BEP20</p>
-              </div>
+        <!-- Address Display (Masked & Copyable) -->
+        <div class="deposit-address-display">
+          <span class="deposit-address-text" id="display-address-masked">7Uehdjwieueuue7***eui8</span>
+          <button onclick="copyDepositAddress()" class="text-gray-400 hover:text-white p-1.5 rounded-lg bg-white/5 active:scale-95 transition-all flex items-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+            <span class="text-[10px] font-bold text-white">Copy</span>
+          </button>
+        </div>
+        
+        <!-- Hidden input to store full address for copying -->
+        <input type="text" id="wallet-address-text" readonly value="0xe4484af8794b0fe2eccf433f7da7ac81935fc4a0" class="hidden">
+
+        <!-- Network Selector (Hidden) -->
+        <div class="hidden">
+          <select id="deposit-network-select-hidden" onchange="changeNetworkFromHidden(this.value)">
+            <option value="usdt_trc20">USDT (TRC20)</option>
+            <option value="usdt_bep20" selected>USDT (BEP20)</option>
+            <option value="usdt_erc20">USDT (ERC20)</option>
+            <option value="ton">TON (Toncoin)</option>
+          </select>
+        </div>
+
+        <!-- Other Networks Toggle -->
+        <div class="text-center mt-2">
+          <button onclick="toggleOtherNetworks()" class="text-[11px] text-cyan-400 font-bold hover:underline transition-all">
+            Need to use a different network? Click here
+          </button>
+        </div>
+
+        <!-- Hidden Other Networks Grid -->
+        <div id="other-networks-grid" class="hidden grid grid-cols-2 gap-2 mt-2 pt-3 border-t border-white/10">
+          <div onclick="selectCryptoMethod('usdt_trc20')" id="card-usdt_trc20" class="network-card">
+            <div class="flex items-center gap-2">
+              <img src="https://cryptologos.cc/logos/tether-usdt-logo.png?v=040" class="w-6 h-6">
+              <div><h5 class="text-[10px] font-bold text-white">USDT</h5><p class="text-[8px] text-emerald-400">TRC20</p></div>
             </div>
           </div>
-
+          <div onclick="selectCryptoMethod('usdt_bep20')" id="card-usdt_bep20" class="network-card active">
+            <div class="flex items-center gap-2">
+              <img src="https://cryptologos.cc/logos/bnb-bnb-logo.png?v=040" class="w-6 h-6">
+              <div><h5 class="text-[10px] font-bold text-white">USDT</h5><p class="text-[8px] text-amber-400">BEP20</p></div>
+            </div>
+          </div>
           <div onclick="selectCryptoMethod('usdt_erc20')" id="card-usdt_erc20" class="network-card">
-            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
-            <div class="flex items-center gap-2.5">
-              <div class="network-logo-wrap network-logo-eth" style="width:34px;height:34px;padding:5px;">
-                <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" alt="ERC20" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#627EEA;font-weight:900;font-size:16px\'>Ξ</span>'">
-              </div>
-              <div class="min-w-0">
-                <h5 class="text-[11px] font-black text-white leading-tight">USDT</h5>
-                <p class="text-[9px] text-blue-400 font-bold">ERC20</p>
-              </div>
+            <div class="flex items-center gap-2">
+              <img src="https://cryptologos.cc/logos/ethereum-eth-logo.png?v=040" class="w-6 h-6">
+              <div><h5 class="text-[10px] font-bold text-white">USDT</h5><p class="text-[8px] text-blue-400">ERC20</p></div>
             </div>
           </div>
-
           <div onclick="selectCryptoMethod('ton')" id="card-ton" class="network-card">
-            <div class="network-check"><i data-lucide="check" class="w-3 h-3"></i></div>
-            <div class="flex items-center gap-2.5">
-              <div class="network-logo-wrap network-logo-ton" style="width:34px;height:34px;padding:5px;">
-                <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" alt="TON" onerror="this.style.display='none';this.parentElement.innerHTML='<span style=\'color:#0098EA;font-weight:900;font-size:16px\'>💎</span>'">
-              </div>
-              <div class="min-w-0">
-                <h5 class="text-[11px] font-black text-white leading-tight">TON</h5>
-                <p class="text-[9px] text-cyan-400 font-bold">Toncoin</p>
-              </div>
+            <div class="flex items-center gap-2">
+              <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040" class="w-6 h-6">
+              <div><h5 class="text-[10px] font-bold text-white">TON</h5><p class="text-[8px] text-cyan-400">Toncoin</p></div>
             </div>
           </div>
+        </div>
+
+        <!-- Rules Text -->
+        <div class="text-[10px] text-red-400/80 space-y-1 mt-2">
+          <p class="flex items-start gap-1.5"><span class="mt-0.5">•</span> Do Not Transact With Sanctioned Entities.</p>
+          <p class="flex items-start gap-1.5"><span class="mt-0.5">•</span> Please Note That Only Supported Networks On Taran App Are Shown; If You Deposit Via Another Network Or Asset, Your Assets Will Be Lost.</p>
         </div>
       </div>
 
-      <div class="bybit-amount-box">
+      <!-- Amount & Proof Section -->
+      <div class="bybit-amount-box mt-4">
         <div class="flex items-center justify-between mb-1">
           <span class="text-[10px] text-gray-400 uppercase font-bold">Amount</span>
           <span class="text-[10px] text-gray-500 font-mono">Min $5.00</span>
@@ -1416,45 +1541,7 @@
         </div>
       </div>
 
-      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
-        <div class="bybit-info-row">
-          <span class="bybit-info-label">Network</span>
-          <span id="selected-network-badge" class="text-emerald-400 font-black font-mono text-[11px]">USDT (TRC20)</span>
-        </div>
-
-        <div class="address-display p-3 space-y-2">
-          <div class="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase font-bold">
-            <i data-lucide="wallet" class="w-3 h-3 text-emerald-400"></i> Deposit Address
-          </div>
-          <div class="flex items-center gap-2">
-            <input type="text" id="wallet-address-text" readonly value="TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs" class="bg-transparent text-[11px] text-emerald-400 font-mono font-bold w-full focus:outline-none tracking-tight">
-            <button onclick="copyToClipboard('wallet-address-text')" class="px-3 py-2 bg-gradient-to-r from-emerald-500 to-cyan-500 text-black font-black rounded-lg text-[10px] shrink-0 flex items-center gap-1 active:scale-95 transition-all">
-              <i data-lucide="copy" class="w-3 h-3"></i> COPY
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <i data-lucide="alert-triangle" class="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5"></i>
-          <div class="text-[10px] leading-relaxed text-amber-200/90">
-            Send only <strong class="text-white" id="warning-net-name">USDT (TRC20)</strong>. Wrong network = <strong class="text-amber-400">permanent loss</strong>.
-          </div>
-        </div>
-
-        <button onclick="toggleDepositQr()" id="qr-toggle-btn" class="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold py-2.5 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all">
-          <i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code
-        </button>
-
-        <div id="deposit-qr-container" class="pt-1 flex flex-col items-center justify-center hidden">
-          <div class="qr-frame">
-            <div>
-              <img id="qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=TLPVBmQnS6VTV7MwzLzYy7EjUKqsKob7hs&color=080b11&bgcolor=ffffff" alt="QR" class="w-40 h-40 rounded-md">
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5">
+      <div class="glass-card rounded-2xl p-4 space-y-3 border border-white/5 mt-3">
         <div class="space-y-2">
           <label class="text-[10px] text-gray-400 uppercase font-bold flex items-center gap-1.5">
             <i data-lucide="hash" class="w-3 h-3 text-emerald-400"></i> TxID (Proof of Payment)
@@ -1475,14 +1562,14 @@
         </div>
       </div>
 
-      <button onclick="initiateDepositProcess()" class="w-full relative overflow-hidden rounded-xl font-extrabold shadow-lg active:scale-95 transition-all">
+      <button onclick="initiateDepositProcess()" class="w-full relative overflow-hidden rounded-xl font-extrabold shadow-lg active:scale-95 transition-all mt-4">
         <span class="block gradient-bg px-4 py-3.5 text-black text-sm font-black tracking-wide flex items-center justify-center gap-2">
           <i data-lucide="shield-check" class="w-4 h-4"></i> SUBMIT DEPOSIT
         </span>
       </button>
     </div>
 
-    <!-- WITHDRAW -->
+    <!-- PROFESSIONAL WITHDRAW SECTION -->
     <div id="section-withdraw" class="space-y-4 hidden">
       <div class="flex items-center justify-between">
         <button onclick="backToWalletOverview()" class="text-xs text-cyan-400 flex items-center gap-1.5 font-bold bg-cyan-500/10 hover:bg-cyan-500/20 px-3 py-2 rounded-lg border border-cyan-500/20 transition-all">
@@ -2463,17 +2550,70 @@
       ton: { name: 'TON (Toncoin)', address: 'UQBGo3k-EhMubMv4h3RqHszdcJdqoxttvZnuwDvPHbk8jl6P', logo: 'https://cryptologos.cc/logos/toncoin-ton-logo.png?v=040', emoji: '💎', logoClass: 'network-logo-ton', color: '#0098EA' }
     };
 
-    let selectedDepositNetworkKey = 'usdt_trc20';
+    let selectedDepositNetworkKey = 'usdt_bep20';
+    
     function selectCryptoMethod(methodKey) {
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
       selectedDepositNetworkKey = methodKey;
+      
+      // Update active states for all cards
       document.querySelectorAll('[id^="card-"]').forEach(card => card.classList.remove('active'));
-      document.getElementById(`card-${methodKey}`).classList.add('active');
+      const targetCard = document.getElementById(`card-${methodKey}`);
+      if(targetCard) targetCard.classList.add('active');
+      
       const data = cryptoWallets[methodKey];
-      document.getElementById('selected-network-badge').innerText = data.name;
-      document.getElementById('warning-net-name').innerText = data.name;
+      
+      // Update main texts
+      const netNameDisplay = data.name.split(' - ')[0] || data.name;
+      const warningText = document.getElementById('notice-text-body');
+      
+      const networkNameForWarning = methodKey.includes('trc20') ? 'TRC20' : methodKey.includes('bep20') ? 'BNB Smart Chain (BEP20)' : methodKey.includes('erc20') ? 'Ethereum (ERC20)' : 'TON';
+      
+      if(warningText) {
+         warningText.innerHTML = `Only send <strong class="text-white">Tether (USDT)</strong> via the <strong class="text-white">${networkNameForWarning}</strong> network assets to this address, sending other assets will result a permanent loss.`;
+      }
+
+      // Update Address & Copy Input
       document.getElementById('wallet-address-text').value = data.address;
-      document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.address)}&color=080b11&bgcolor=ffffff`;
+      
+      // MASK THE ADDRESS: First 7 chars + "***" + Last 4 chars
+      const masked = data.address.substring(0, 7) + '***' + data.address.slice(-4);
+      document.getElementById('display-address-masked').innerText = masked;
+      
+      // Update QR Code
+      document.getElementById('qr-code-img').src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(data.address)}&color=000000&bgcolor=ffffff`;
+      
+      // Update "From" display
+      const fromWallet = document.getElementById('deposit-from-wallet');
+      if (methodKey.includes('trc20') || methodKey.includes('ton')) {
+        fromWallet.innerText = 'TLPVBm***Kob7hs';
+      } else {
+        fromWallet.innerText = '0x4EC42***0DD6C94';
+      }
+
+      // Update Hidden Select
+      document.getElementById('deposit-network-select-hidden').value = methodKey;
+      
+      // Close grid
+      document.getElementById('other-networks-grid').classList.add('hidden');
+    }
+
+    function toggleOtherNetworks() {
+      const grid = document.getElementById('other-networks-grid');
+      grid.classList.toggle('hidden');
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    }
+
+    function changeNetworkFromHidden(val) {
+      selectCryptoMethod(val);
+    }
+
+    // COPY FULL ADDRESS FUNCTION
+    function copyDepositAddress() {
+      const fullAddr = document.getElementById('wallet-address-text').value;
+      navigator.clipboard.writeText(fullAddr);
+      if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+      showModernAlert({ title: 'Address Copied', message: 'The full deposit address has been copied to your clipboard.', type: 'success', icon: 'copy' });
     }
 
     function setDepositQuickAmount(amt) {
@@ -2485,15 +2625,6 @@
       document.getElementById('withdraw-amount').value = amt;
       calculateWithdrawFee();
       if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
-    }
-
-    function toggleDepositQr() {
-      const qrContainer = document.getElementById('deposit-qr-container');
-      const toggleBtn = document.getElementById('qr-toggle-btn');
-      qrContainer.classList.toggle('hidden');
-      const isHidden = qrContainer.classList.contains('hidden');
-      toggleBtn.innerHTML = isHidden ? '<i data-lucide="qr-code" class="w-4 h-4"></i> Show QR Code' : '<i data-lucide="eye-off" class="w-4 h-4"></i> Hide QR Code';
-      lucide.createIcons();
     }
 
     function handleScreenshotUpload(event) {
@@ -3326,4 +3457,4 @@
     }
   </script>
 </body>
-                                                 </html>
+  </html>
