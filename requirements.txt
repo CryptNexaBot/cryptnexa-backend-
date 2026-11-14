@@ -1,6 +1,9 @@
-payerurl
-python-dotenv
+Flask
 Flask-Cors
 Flask-Limiter
+python-dotenv
 PyJWT
+requests
+payerurl
+gunicorn
 
