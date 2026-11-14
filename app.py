@@ -14,9 +14,6 @@ from flask_limiter.util import get_remote_address
 from urllib.parse import parse_qsl
 from dotenv import load_dotenv
 
-# ✅ MAKTABADDA SAXDA AH EE PAYERURL
-from binance_and_crypto_payment import CryptoPaymentClient
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -37,6 +34,7 @@ def save_db(data):
     with open(DB_FILE, 'w') as f:
         json.dump(data, f, indent=4)
 
+# Initialize DB
 db = load_db()
 
 # ==========================================
@@ -45,23 +43,11 @@ db = load_db()
 limiter = Limiter(get_remote_address, app=app, default_limits=["100 per 15 minutes"], storage_uri="memory://")
 
 # ==========================================
-# 3. HELPERS & CONFIG
+# 3. HELPERS
 # ==========================================
 BOT_TOKEN = os.getenv('BOT_TOKEN', 'YOUR_BOT_TOKEN')
 ADMIN_ID = os.getenv('ADMIN_ID', '5738022147')
 JWT_SECRET = os.getenv('JWT_SECRET', 'super-secret')
-
-# PayerURL Keys
-PAYERURL_PUBLIC_KEY = os.getenv('PAYERURL_PUBLIC_KEY', '539abb836b1165830194c5c47e8830e4')
-PAYERURL_SECRET_KEY = os.getenv('PAYERURL_SECRET_KEY', '2d3de9443631f27f36f107f65367c7ac')
-
-# 🚀 DOMAIN-KAAGA RENDER OO LA GALAY
-YOUR_DOMAIN = os.getenv('YOUR_DOMAIN', 'https://cryptnexa-backend.onrender.com') 
-
-payer_client = CryptoPaymentClient(
-    public_key=PAYERURL_PUBLIC_KEY,
-    secret_key=PAYERURL_SECRET_KEY
-)
 
 def verify_telegram_data(init_data):
     try:
@@ -91,6 +77,9 @@ def auth_middleware(f):
     wrapper.__name__ = f.__name__
     return wrapper
 
+# ==========================================
+# TELEGRAM BOT HELPERS
+# ==========================================
 def send_tg_message(chat_id, text, reply_markup=None):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
     payload = {'chat_id': chat_id, 'text': text, 'parse_mode': 'Markdown'}
@@ -124,83 +113,6 @@ def login():
 
     return jsonify({'token': generate_token(user_id), 'user': db['users'][user_id]})
 
-# ==========================================
-# 5. PAYERURL AUTOMATED DEPOSITS
-# ==========================================
-@app.route('/api/deposit/auto', methods=['POST'])
-@auth_middleware
-def deposit_auto():
-    data = request.json
-    amount = float(data.get('amount'))
-    
-    if amount < 5:
-        return jsonify({'error': 'Minimum deposit is $5'}), 400
-
-    try:
-        # Samee Invoice
-        response = payer_client.create_invoice(
-            order_id=f"DEP_{request.user_id}_{int(time.time())}",
-            amount=amount,
-            currency="USD",
-            notify_url=f"{YOUR_DOMAIN}/api/deposit/webhook"
-        )
-        
-        checkout_url = response.get('redirect_url') or response.get('checkout_url')
-        if not checkout_url:
-            return jsonify({'error': 'Payment link generation failed'}), 500
-            
-        return jsonify({'success': True, 'checkout_url': checkout_url})
-    except Exception as e:
-        print("PayerURL Error:", e)
-        return jsonify({'error': 'Failed to create payment link'}), 500
-
-@app.route('/api/deposit/webhook', methods=['POST'])
-def deposit_webhook():
-    try:
-        payload = request.json
-        if not payload:
-            return jsonify({"status": "error", "message": "No payload"}), 400
-
-        # PayerURL waxay soo dirtaa macluumaadkan
-        order_id = payload.get('order_id')
-        status = payload.get('status')
-        
-        # Hubi xaaladda (Maktabadda cusub waxay isticmaashaa 'completed' ama 'success')
-        if status in ['completed', 'success', 'paid']:
-            parts = order_id.split('_')
-            if len(parts) >= 2:
-                user_id = parts[1]
-                amount_paid = float(payload.get('amount', 0))
-                
-                # Hubi in aysan horey u xaqiijin (Duplicate check)
-                if order_id not in db['transactions']:
-                    tx_id = str(int(time.time() * 1000))
-                    
-                    db['transactions'][tx_id] = {
-                        'id': tx_id, 'userId': user_id, 'order_id': order_id,
-                        'amount': amount_paid, 'network': 'PayerURL Auto', 
-                        'status': 'Completed', 'type': 'deposit'
-                    }
-                    
-                    user = db['users'].get(user_id)
-                    if user:
-                        user['balance'] += amount_paid
-                        user['totalDeposited'] = user.get('totalDeposited', 0) + amount_paid
-                        db['users'][user_id] = user
-                        
-                    save_db(db)
-                    send_tg_message(user_id, f"✅ *Auto Deposit Successful!*\n💰 +${amount_paid:.2f} added to your balance.")
-                    send_tg_message(ADMIN_ID, f"💰 *AUTO DEPOSIT*\n👤 User: `{user_id}`\n💵 Amount: *${amount_paid:.2f}*")
-            
-        return jsonify({"status": "success"}), 200
-            
-    except Exception as e:
-        print("Webhook Error:", e)
-        return jsonify({"status": "error"}), 400
-
-# ==========================================
-# 6. MANUAL DEPOSIT & WITHDRAWAL
-# ==========================================
 @app.route('/api/deposit/request', methods=['POST'])
 @limiter.limit("5 per 15 minutes")
 @auth_middleware
@@ -208,17 +120,19 @@ def deposit_request():
     data = request.json
     txid, amount, network = data.get('txid'), float(data.get('amount')), data.get('network')
     
-    if any(t.get('txid') == txid for t in db['transactions'].values()):
+    # Check if TxID already used
+    if any(t['txid'] == txid for t in db['transactions'].values()):
         return jsonify({'error': 'TxID used'}), 400
 
-    tx_id = str(int(time.time() * 1000))
+    # Create transaction
+    tx_id = str(int(time.time() * 1000)) # Unique ID
     db['transactions'][tx_id] = {
         'id': tx_id, 'userId': request.user_id, 'txid': txid, 
         'amount': amount, 'network': network, 'status': 'Pending Review', 'type': 'deposit'
     }
     save_db(db)
 
-    msg = f"🚨 *NEW MANUAL DEPOSIT*\n\n👤 User: `{request.user_id}`\n💰 Amount: *${amount}*\n🌐 Network: {network}\n🔗 TxID: `{txid}`"
+    msg = f"🚨 *NEW DEPOSIT*\n\n👤 User: `{request.user_id}`\n💰 Amount: *${amount}*\n🌐 Network: {network}\n🔗 TxID: `{txid}`"
     buttons = {'inline_keyboard': [[
         {'text': '✅ Approve', 'callback_data': f'dep_ok_{tx_id}'},
         {'text': '❌ Reject', 'callback_data': f'dep_no_{tx_id}'}
@@ -237,10 +151,11 @@ def withdraw_request():
     if not user or user['balance'] < amount: 
         return jsonify({'error': 'Insufficient balance'}), 400
         
+    # Deduct balance immediately
     user['balance'] -= amount
     db['users'][request.user_id] = user
 
-    tx_id = str(int(time.time() * 1000))
+    tx_id = str(int(time.time() * 1000)) # Unique ID
     db['transactions'][tx_id] = {
         'id': tx_id, 'userId': request.user_id, 'amount': amount, 
         'network': network, 'address': address, 'status': 'Pending Review', 'type': 'withdraw'
@@ -257,7 +172,7 @@ def withdraw_request():
     return jsonify({'success': True, 'message': 'Pending Admin Approval', 'new_balance': user['balance']})
 
 # ==========================================
-# 7. TELEGRAM CALLBACK LISTENER (Polling)
+# 5. TELEGRAM CALLBACK LISTENER (Polling)
 # ==========================================
 def telegram_polling():
     print("🤖 Telegram bot polling started...")
